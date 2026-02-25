@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  skillshub:
+    build: .
+    command: uvicorn service:app --host 0.0.0.0 --port 8001
+    ports:
+      - "8001:8001"
+    volumes:
+      - /tmp/skillshub_corpus.json:/tmp/skillshub_corpus.json:ro
+      - ./data/index:/data/index
+      - ./data/skills_meta.json:/app/skills_meta.json:ro
+    environment:
+      - SKILLSHUB_API_KEY=${SKILLSHUB_API_KEY}
+      - SKILLSHUB_ALLOW_EXEC=${SKILLSHUB_ALLOW_EXEC:-0}

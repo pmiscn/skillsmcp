@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/spec/skill-manifest.schema.json",
+  "title": "Skill manifest",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schemaVersion", "id", "name", "version", "entry"],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "description": "Schema version of this manifest format (not the skill version).",
+      "examples": ["1.0"]
+    },
+    "id": {
+      "type": "string",
+      "description": "Globally-unique identifier for the skill.",
+      "pattern": "^[a-zA-Z0-9._-]+(/[a-zA-Z0-9._-]+)*$",
+      "examples": ["skills.sh/sample-skill", "acme.invoice_parser"]
+    },
+    "name": {"type": "string"},
+    "description": {"type": "string"},
+    "version": {
+      "type": "string",
+      "description": "Skill version (SemVer recommended).",
+      "examples": ["0.1.0"]
+    },
+    "license": {"type": "string"},
+    "homepage": {"type": "string", "format": "uri"},
+    "tags": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "repository": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "type": {"type": "string", "enum": ["github", "git"]},
+        "owner": {"type": "string"},
+        "repo": {"type": "string"},
+        "url": {"type": "string"},
+        "cloneUrl": {
+          "type": "string",
+          "description": "Preferred GitHub clone URL pattern: https://github.com/{owner}/{repo}.git"
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Integrity expectations for fetched skills.",
+      "properties": {
+        "pinnedCommit": {
+          "type": "string",
+          "description": "Expected full 40-char git commit SHA.",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "pinnedTag": {
+          "type": "string",
+          "description": "Expected git tag name (exact match)."
+        },
+        "sha256": {
+          "type": "string",
+          "description": "Optional expected sha256 of repo contents (implementation-defined).",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Entrypoints for runtimes. Loaders SHOULD NOT execute remote code by default.",
+      "required": [],
+      "properties": {
+        "node": {
+          "type": "string",
+          "description": "Relative path to Node entry module (e.g., dist/index.js)."
+        },
+        "python": {
+          "type": "string",
+          "description": "Relative path to Python entry module/file (e.g., skill.py)."
+        },
+        "path": {
+          "type": "string",
+          "description": "Generic entry path when runtime-specific fields are not used."
+        },
+        "exports": {
+          "type": "object",
+          "additionalProperties": {"type": "string"},
+          "description": "Named exports mapping (runtime-defined)."
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "node": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "minVersion": {"type": "string", "examples": [">=18"]}
+          }
+        },
+        "python": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "minVersion": {"type": "string", "examples": [">=3.10"]}
+          }
+        }
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Optional declared permissions/capabilities (advisory).",
+      "properties": {
+        "network": {"type": "boolean"},
+        "filesystem": {"type": "boolean"},
+        "subprocess": {"type": "boolean"}
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "skill-loader-node",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Minimal skill loader (git/zip) for skills.sh GitHub repositories",
+  "license": "MIT",
+  "dependencies": {
+    "adm-zip": "^0.5.16",
+    "yaml": "^2.4.5"
+  },
+  "scripts": {
+    "test": "node --test",
+    "example:resolve": "node examples/resolve-and-dry-run.js",
+    "example:load": "node examples/load-skill.js"
+  }
+}

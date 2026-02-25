@@ -1,0 +1,101 @@
+{
+  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
+ "agents": {
+    "sisyphus": {
+      "model": "github-copilot/gemini-3-flash-preview"
+    },
+    "atlas": {
+      "model": "github-copilot/gpt-5-mini"
+    },
+    "librarian": {
+      "model": "github-copilot/gpt-4.1"
+    },
+    "explore": {
+      "model": "github-copilot/gemini-3-flash-preview"
+    },
+    "multimodal-looker": {
+      "model": "github-copilot/gemini-3-flash-preview"
+    },
+    "prometheus": {
+      "model": "github-copilot/gpt-5.2",
+      "variant": "high"
+    },
+    "oracle": {
+      "model": "github-copilot/gpt-5.2",
+      "variant": "high"
+    },
+    "metis": {
+      "model": "github-copilot/gpt-5.2-codex",
+      "variant": "high"
+    },
+    "momus": {
+      "model": "github-copilot/gpt-4o"
+    }
+  },
+  "categories": {
+    "quick": {
+      "model": "github-copilot/gpt-5-mini"
+    },
+    "unspecified-low": {
+      "model": "github-copilot/gpt-4.1"
+    },
+    "unspecified-high": {
+      "model": "github-copilot/gpt-5.2"
+    },
+    "writing": {
+      "model": "github-copilot/gpt-4o"
+    },
+    "visual-engineering": {
+      "model": "github-copilot/gemini-3-pro-preview"
+    },
+    "artistry": {
+      "model": "github-copilot/gemini-3-pro-preview"
+    },
+    "ultrabrain": {
+      "model": "github-copilot/gpt-5.2-codex",
+      "variant": "xhigh"
+    },
+    "architect": {
+      "model": "github-copilot/gpt-5.2-codex",
+      "variant": "high"
+    }
+  },
+  "lsp": {
+    "python": {
+      "server": "pyright",
+      "command": "pyright-langserver",
+      "args": ["--stdio"]
+    },
+    
+    "javascript": {
+      "server": "typescript-language-server",
+      "command": "typescript-language-server",
+      "args": ["--stdio"]
+    },
+    "typescript": {
+      "server": "typescript-language-server",
+      "command": "typescript-language-server",
+      "args": ["--stdio"]
+    },
+    "html": {
+      "server": "vscode-html-languageserver",
+      "command": "html-languageserver",
+      "args": ["--stdio"]
+    },
+    "css": {
+      "server": "vscode-css-languageserver",
+      "command": "css-languageserver",
+      "args": ["--stdio"]
+    },
+    "json": {
+      "server": "vscode-json-languageserver",
+      "command": "vscode-json-languageserver",
+      "args": ["--stdio"]
+    },
+    "yaml": {
+      "server": "yaml-language-server",
+      "command": "yaml-language-server",
+      "args": ["--stdio"]
+    }
+  }
+}

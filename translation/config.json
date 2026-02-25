@@ -1,0 +1,17 @@
+{
+  "engines": [
+    {
+      "type": "http",
+      "url": "http://127.0.0.1:9000/translate",
+      "apiKeyHeader": "X-API-KEY",
+      "apiKeyEnv": "TRANSLATION_API_KEY"
+    },
+    {
+      "type": "llm",
+      "url": "http://127.0.0.1:9100/translate",
+      "apiKeyHeader": "X-API-KEY",
+      "apiKeyEnv": "TRANSLATION_LLM_API_KEY"
+    },
+    { "type": "internal" }
+  ]
+}

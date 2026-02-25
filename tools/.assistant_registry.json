@@ -1,0 +1,398 @@
+{
+  "local/template": {
+    "id": "local/template",
+    "name": "template-skill",
+    "description": "Replace with description of the skill and when Claude should use it.",
+    "skill_path": "external_skills/anthropics__skills__HEAD/template/SKILL.md",
+    "repo_clone_dir": ".",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/pptx": {
+    "id": "local/pptx",
+    "name": "pptx",
+    "description": "Presentation creation, editing, and analysis. When Claude needs to work with presentations (.pptx files) for: (1) Creating new presentations, (2) Modifying or editing content, (3) Working with layouts, (4) Adding comments or speaker notes, or any other presentation tasks",
+    "skill_path": "external_skills/anthropics__skills__HEAD/skills/pptx/SKILL.md",
+    "repo_clone_dir": "external_skills",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/slack-gif-creator": {
+    "id": "local/slack-gif-creator",
+    "name": "slack-gif-creator",
+    "description": "Knowledge and utilities for creating animated GIFs optimized for Slack. Provides constraints, validation tools, and animation concepts. Use when users request animated GIFs for Slack like \"make me a GIF of X doing Y for Slack.\"",
+    "skill_path": "external_skills/anthropics__skills__HEAD/skills/slack-gif-creator/SKILL.md",
+    "repo_clone_dir": "external_skills",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/doc-coauthoring": {
+    "id": "local/doc-coauthoring",
+    "name": "doc-coauthoring",
+    "description": "Guide users through a structured workflow for co-authoring documentation. Use when user wants to write documentation, proposals, technical specs, decision docs, or similar structured content. This workflow helps users efficiently transfer context, refine content through iteration, and verify the doc works for readers. Trigger when user mentions writing docs, creating proposals, drafting specs, or similar documentation tasks.",
+    "skill_path": "external_skills/anthropics__skills__HEAD/skills/doc-coauthoring/SKILL.md",
+    "repo_clone_dir": "external_skills",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/internal-comms": {
+    "id": "local/internal-comms",
+    "name": "internal-comms",
+    "description": "A set of resources to help me write all kinds of internal communications, using the formats that my company likes to use. Claude should use this skill whenever asked to write some sort of internal communications (status reports, leadership updates, 3P updates, company newsletters, FAQs, incident reports, project updates, etc.).",
+    "skill_path": "external_skills/anthropics__skills__HEAD/skills/internal-comms/SKILL.md",
+    "repo_clone_dir": "external_skills",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/brand-guidelines": {
+    "id": "local/brand-guidelines",
+    "name": "brand-guidelines",
+    "description": "Applies Anthropic's official brand colors and typography to any sort of artifact that may benefit from having Anthropic's look-and-feel. Use it when brand colors or style guidelines, visual formatting, or company design standards apply.",
+    "skill_path": "external_skills/anthropics__skills__HEAD/skills/brand-guidelines/SKILL.md",
+    "repo_clone_dir": "external_skills",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/algorithmic-art": {
+    "id": "local/algorithmic-art",
+    "name": "algorithmic-art",
+    "description": "Creating algorithmic art using p5.js with seeded randomness and interactive parameter exploration. Use this when users request creating art using code, generative art, algorithmic art, flow fields, or particle systems. Create original algorithmic art rather than copying existing artists' work to avoid copyright violations.",
+    "skill_path": "external_skills/anthropics__skills__HEAD/skills/algorithmic-art/SKILL.md",
+    "repo_clone_dir": "external_skills",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/canvas-design": {
+    "id": "local/canvas-design",
+    "name": "canvas-design",
+    "description": "Create beautiful visual art in .png and .pdf documents using design philosophy. You should use this skill when the user asks to create a poster, piece of art, design, or other static piece. Create original visual designs, never copying existing artists' work to avoid copyright violations.",
+    "skill_path": "external_skills/anthropics__skills__HEAD/skills/canvas-design/SKILL.md",
+    "repo_clone_dir": "external_skills",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/skill-creator": {
+    "id": "local/skill-creator",
+    "name": "skill-creator",
+    "description": "Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Claude's capabilities with specialized knowledge, workflows, or tool integrations.",
+    "skill_path": "external_skills/anthropics__skills__HEAD/skills/skill-creator/SKILL.md",
+    "repo_clone_dir": "external_skills",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/xlsx": {
+    "id": "local/xlsx",
+    "name": "xlsx",
+    "description": "Comprehensive spreadsheet creation, editing, and analysis with support for formulas, formatting, data analysis, and visualization. When Claude needs to work with spreadsheets (.xlsx, .xlsm, .csv, .tsv, etc) for: (1) Creating new spreadsheets with formulas and formatting, (2) Reading or analyzing data, (3) Modify existing spreadsheets while preserving formulas, (4) Data analysis and visualization in spreadsheets, or (5) Recalculating formulas",
+    "skill_path": "external_skills/anthropics__skills__HEAD/skills/xlsx/SKILL.md",
+    "repo_clone_dir": "external_skills",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/frontend-design": {
+    "id": "local/frontend-design",
+    "name": "frontend-design",
+    "description": "Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications (examples include websites, landing pages, dashboards, React components, HTML/CSS layouts, or when styling/beautifying any web UI). Generates creative, polished code and UI design that avoids generic AI aesthetics.",
+    "skill_path": "external_skills/anthropics__skills__HEAD/skills/frontend-design/SKILL.md",
+    "repo_clone_dir": "external_skills",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/pdf": {
+    "id": "local/pdf",
+    "name": "pdf",
+    "description": "Comprehensive PDF manipulation toolkit for extracting text and tables, creating new PDFs, merging/splitting documents, and handling forms. When Claude needs to fill in a PDF form or programmatically process, generate, or analyze PDF documents at scale.",
+    "skill_path": "external_skills/anthropics__skills__HEAD/skills/pdf/SKILL.md",
+    "repo_clone_dir": "external_skills",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/theme-factory": {
+    "id": "local/theme-factory",
+    "name": "theme-factory",
+    "description": "Toolkit for styling artifacts with a theme. These artifacts can be slides, docs, reportings, HTML landing pages, etc. There are 10 pre-set themes with colors/fonts that you can apply to any artifact that has been creating, or can generate a new theme on-the-fly.",
+    "skill_path": "external_skills/anthropics__skills__HEAD/skills/theme-factory/SKILL.md",
+    "repo_clone_dir": "external_skills",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/web-artifacts-builder": {
+    "id": "local/web-artifacts-builder",
+    "name": "web-artifacts-builder",
+    "description": "Suite of tools for creating elaborate, multi-component claude.ai HTML artifacts using modern frontend web technologies (React, Tailwind CSS, shadcn/ui). Use for complex artifacts requiring state management, routing, or shadcn/ui components - not for simple single-file HTML/JSX artifacts.",
+    "skill_path": "external_skills/anthropics__skills__HEAD/skills/web-artifacts-builder/SKILL.md",
+    "repo_clone_dir": "external_skills",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/docx": {
+    "id": "local/docx",
+    "name": "docx",
+    "description": "Comprehensive document creation, editing, and analysis with support for tracked changes, comments, formatting preservation, and text extraction. When Claude needs to work with professional documents (.docx files) for: (1) Creating new documents, (2) Modifying or editing content, (3) Working with tracked changes, (4) Adding comments, or any other document tasks",
+    "skill_path": "external_skills/anthropics__skills__HEAD/skills/docx/SKILL.md",
+    "repo_clone_dir": "external_skills",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/webapp-testing": {
+    "id": "local/webapp-testing",
+    "name": "webapp-testing",
+    "description": "Toolkit for interacting with and testing local web applications using Playwright. Supports verifying frontend functionality, debugging UI behavior, capturing browser screenshots, and viewing browser logs.",
+    "skill_path": "external_skills/anthropics__skills__HEAD/skills/webapp-testing/SKILL.md",
+    "repo_clone_dir": "external_skills",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/mcp-builder": {
+    "id": "local/mcp-builder",
+    "name": "mcp-builder",
+    "description": "Guide for creating high-quality MCP (Model Context Protocol) servers that enable LLMs to interact with external services through well-designed tools. Use when building MCP servers to integrate external APIs or services, whether in Python (FastMCP) or Node/TypeScript (MCP SDK).",
+    "skill_path": "external_skills/anthropics__skills__HEAD/skills/mcp-builder/SKILL.md",
+    "repo_clone_dir": "external_skills",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/rebase-assistant": {
+    "id": "local/rebase-assistant",
+    "name": "rebase-assistant",
+    "description": "Guide a safe git rebase of the current branch onto a target branch, including conflict triage and resolution steps. Use when asked to rebase, update a branch, or resolve rebase conflicts.",
+    "skill_path": "external_skills/jMerta__codex-skills__HEAD/rebase-assistant/SKILL.md",
+    "repo_clone_dir": ".",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/create-cli": {
+    "id": "local/create-cli",
+    "name": "create-cli",
+    "description": "Design command-line interface parameters and UX: arguments, flags, subcommands, help text, output formats, error messages, exit codes, prompts, config/env precedence, and safe/dry-run behavior. Use when you’re designing a CLI spec (before implementation) or refactoring an existing CLI’s surface area for consistency, composability, and discoverability.",
+    "skill_path": "external_skills/jMerta__codex-skills__HEAD/create-cli/SKILL.md",
+    "repo_clone_dir": ".",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/sessions-to-blog": {
+    "id": "local/sessions-to-blog",
+    "name": "sessions-to-blog",
+    "description": "Generate MDX blog posts or recaps from session logs in `sessions/articles`. Use when the user asks to turn daily session notes into publishable blog posts, define writing style or linking rules for those posts, or produce MDX drafts that follow the project's standards and file location.",
+    "skill_path": "external_skills/jMerta__codex-skills__HEAD/sessions-to-blog/SKILL.md",
+    "repo_clone_dir": ".",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/create-pr": {
+    "id": "local/create-pr",
+    "name": "create-pr",
+    "description": "Create a high-quality pull request: branch, focused changes, lint/build, conventional commit, and a clear PR description with validation steps. Use when the user asks to open or prepare a PR.",
+    "skill_path": "external_skills/jMerta__codex-skills__HEAD/create-pr/SKILL.md",
+    "repo_clone_dir": ".",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/coding-guidelines-gen": {
+    "id": "local/coding-guidelines-gen",
+    "name": "coding-guidelines-gen",
+    "description": "Generate nested AGENTS.md coding guidelines per module (monorepo-aware), detect languages/tooling, ask architecture preferences, and set up missing formatters/linters (Spotless for JVM). Use when the user wants module-scoped AGENTS.md coding guidelines or to set up missing formatters/linters.",
+    "skill_path": "external_skills/jMerta__codex-skills__HEAD/coding-guidelines-gen/SKILL.md",
+    "repo_clone_dir": ".",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/bug-triage": {
+    "id": "local/bug-triage",
+    "name": "bug-triage",
+    "description": "Reproduce, isolate, and fix a bug (or failing build/test), then summarize root cause, fix, and verification steps. Use when the user reports a bug, regression, or failing build/test and wants a fix.",
+    "skill_path": "external_skills/jMerta__codex-skills__HEAD/bug-triage/SKILL.md",
+    "repo_clone_dir": ".",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/video-transcript-downloader": {
+    "id": "local/video-transcript-downloader",
+    "name": "video-transcript-downloader",
+    "description": "Download videos, audio, subtitles, and clean paragraph-style transcripts from YouTube and any other yt-dlp supported site. Use when asked to “download this video”, “save this clip”, “rip audio”, “get subtitles”, “get transcript”, or to troubleshoot yt-dlp/ffmpeg and formats/playlists.",
+    "skill_path": "external_skills/jMerta__codex-skills__HEAD/video-transcript-downloader/SKILL.md",
+    "repo_clone_dir": ".",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/brave-search": {
+    "id": "local/brave-search",
+    "name": "brave-search",
+    "description": "Web search and content extraction via Brave Search API. Use for searching documentation, facts, or any web content. Lightweight, no browser required.",
+    "skill_path": "external_skills/jMerta__codex-skills__HEAD/brave-search/SKILL.md",
+    "repo_clone_dir": ".",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/oracle": {
+    "id": "local/oracle",
+    "name": "oracle",
+    "description": "Use the @steipete/oracle CLI to bundle a prompt plus the right files and get a second-model review (API or browser) for debugging, refactors, design checks, or cross-validation.",
+    "skill_path": "external_skills/jMerta__codex-skills__HEAD/oracle/SKILL.md",
+    "repo_clone_dir": ".",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/plan-work": {
+    "id": "local/plan-work",
+    "name": "plan-work",
+    "description": "Plan work before coding: do repo research, analyze options/risks, and ask clarifying questions before proposing an implementation plan. Use when the user asks for a plan, design/approach, scope breakdown, or implementation steps.",
+    "skill_path": "external_skills/jMerta__codex-skills__HEAD/plan-work/SKILL.md",
+    "repo_clone_dir": ".",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/ui-ux-pro-max": {
+    "id": "local/ui-ux-pro-max",
+    "name": "ui-ux-pro-max",
+    "description": "Use when designing, building, or refining frontend UI/UX: layouts, components, visual systems, typography, color, and UX patterns for websites, landing pages, dashboards, and product interfaces. Provides searchable styles, palettes, font pairings, charts, and stack best practices (React, Next.js, Vue, Svelte, SwiftUI, React Native, Flutter, Tailwind).",
+    "skill_path": "external_skills/jMerta__codex-skills__HEAD/ui-ux-pro-max/SKILL.md",
+    "repo_clone_dir": ".",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/docs-sync": {
+    "id": "local/docs-sync",
+    "name": "docs-sync",
+    "description": "Keep documentation in sync with code changes across README, docs sites, API docs, runbooks, and configuration. Use when the user asks to update docs, ensure docs match behavior, or prepare docs for a release/PR.",
+    "skill_path": "external_skills/jMerta__codex-skills__HEAD/docs-sync/SKILL.md",
+    "repo_clone_dir": ".",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/branch-cleaner": {
+    "id": "local/branch-cleaner",
+    "name": "branch-cleaner",
+    "description": "Identify and clean up stale git branches locally and on remotes with safe, reversible steps. Use when asked to prune, list, or delete merged/old branches or audit branch hygiene.",
+    "skill_path": "external_skills/jMerta__codex-skills__HEAD/branch-cleaner/SKILL.md",
+    "repo_clone_dir": ".",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/regex-builder": {
+    "id": "local/regex-builder",
+    "name": "regex-builder",
+    "description": "Build, test, and explain regular expressions against sample text or files using CLI tools (rg, python) and specific regex flavors. Use when asked to craft, debug, or validate regexes or search patterns.",
+    "skill_path": "external_skills/jMerta__codex-skills__HEAD/regex-builder/SKILL.md",
+    "repo_clone_dir": ".",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/ci-fix": {
+    "id": "local/ci-fix",
+    "name": "ci-fix",
+    "description": "Fix GitHub Actions CI failures using GitHub CLI (gh): inspect runs/logs, identify root cause, patch workflows/code, rerun jobs, and summarize verification. Use when GitHub Actions CI is failing or needs diagnosis.",
+    "skill_path": "external_skills/jMerta__codex-skills__HEAD/ci-fix/SKILL.md",
+    "repo_clone_dir": ".",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/vps-checkup": {
+    "id": "local/vps-checkup",
+    "name": "vps-checkup",
+    "description": "SSH into an Ubuntu VPS (Docker) for a read-only health/security/update report (UFW + fail2ban) and propose fixes; apply updates/restarts only with explicit confirmation. Use when the user wants a read-only VPS health/security check.",
+    "skill_path": "external_skills/jMerta__codex-skills__HEAD/vps-checkup/SKILL.md",
+    "repo_clone_dir": ".",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/agents-md": {
+    "id": "local/agents-md",
+    "name": "agents-md",
+    "description": "Create or update root and nested AGENTS.md files that document scoped conventions, monorepo module maps, cross-domain workflows, and (optionally) per-module feature maps (feature -> paths, entrypoints, tests, docs). Use when the user asks for AGENTS.md, nested agent instructions, or a module/feature map.",
+    "skill_path": "external_skills/jMerta__codex-skills__HEAD/agents-md/SKILL.md",
+    "repo_clone_dir": ".",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/coding-guidelines-verify": {
+    "id": "local/coding-guidelines-verify",
+    "name": "coding-guidelines-verify",
+    "description": "Verify changes follow nearest-scoped AGENTS.md rules: group changed files by nested scope, auto-fix formatting, run lint/tests, and report violations. Use when the user wants scoped compliance checks for changed files.",
+    "skill_path": "external_skills/jMerta__codex-skills__HEAD/coding-guidelines-verify/SKILL.md",
+    "repo_clone_dir": ".",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/commit-work": {
+    "id": "local/commit-work",
+    "name": "commit-work",
+    "description": "Create high-quality git commits: review/stage intended changes, split into logical commits, and write clear commit messages (including Conventional Commits). Use when the user asks to commit, craft a commit message, stage changes, or split work into multiple commits.",
+    "skill_path": "external_skills/jMerta__codex-skills__HEAD/commit-work/SKILL.md",
+    "repo_clone_dir": ".",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/release-notes": {
+    "id": "local/release-notes",
+    "name": "release-notes",
+    "description": "Draft release notes and changelog entries from git history or merged PRs between two refs (tags/SHAs/branches), including breaking changes, migrations, and upgrade steps. Use when the user asks for release notes, changelog updates, or a GitHub Release draft.",
+    "skill_path": "external_skills/jMerta__codex-skills__HEAD/release-notes/SKILL.md",
+    "repo_clone_dir": ".",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/dependency-upgrader": {
+    "id": "local/dependency-upgrader",
+    "name": "dependency-upgrader",
+    "description": "Upgrade dependencies for Java/Kotlin (Gradle/Maven) and TypeScript/Node projects with minimal risk: plan the bump, apply changes incrementally, run tests/builds, and document breaking changes. Use when the user asks to bump deps, update frameworks, or address CVEs.",
+    "skill_path": "external_skills/jMerta__codex-skills__HEAD/dependency-upgrader/SKILL.md",
+    "repo_clone_dir": ".",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/find-skills": {
+    "id": "local/find-skills",
+    "name": "find-skills",
+    "description": "Helps users discover and install agent skills when they ask questions like \"how do I do X\", \"find a skill for X\", \"is there a skill that can...\", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.",
+    "skill_path": "external_skills/vercel-labs__skills__HEAD/skills/find-skills/SKILL.md",
+    "repo_clone_dir": "external_skills",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "vercel-labs/agent-skills/skills/claude.ai/vercel-deploy-claimable": {
+    "id": "vercel-labs/agent-skills/skills/claude.ai/vercel-deploy-claimable",
+    "name": "vercel-deploy",
+    "description": "Deploy applications and websites to Vercel. Use this skill when the user requests deployment actions such as \"Deploy my app\", \"Deploy this to production\", \"Create a preview deployment\", \"Deploy and give me the link\", or \"Push this live\". No authentication required - returns preview URL and claimable deployment link.",
+    "skill_path": "external_skills/vercel-labs__agent-skills__HEAD/skills/claude.ai/vercel-deploy-claimable/SKILL.md",
+    "repo_clone_dir": "external_skills/vercel-labs__agent-skills__HEAD",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/react-native-skills": {
+    "id": "local/react-native-skills",
+    "name": "vercel-react-native-skills",
+    "description": "React Native and Expo best practices for building performant mobile apps. Use when building React Native components, optimizing list performance, implementing animations, or working with native modules. Triggers on tasks involving React Native, Expo, mobile performance, or native platform APIs.",
+    "skill_path": "external_skills/vercel-labs__agent-skills__HEAD/skills/react-native-skills/SKILL.md",
+    "repo_clone_dir": "external_skills",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/react-best-practices": {
+    "id": "local/react-best-practices",
+    "name": "vercel-react-best-practices",
+    "description": "React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns. Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements.",
+    "skill_path": "external_skills/vercel-labs__agent-skills__HEAD/skills/react-best-practices/SKILL.md",
+    "repo_clone_dir": "external_skills",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/web-design-guidelines": {
+    "id": "local/web-design-guidelines",
+    "name": "web-design-guidelines",
+    "description": "Review UI code for Web Interface Guidelines compliance. Use when asked to \"review my UI\", \"check accessibility\", \"audit design\", \"review UX\", or \"check my site against best practices\".",
+    "skill_path": "external_skills/vercel-labs__agent-skills__HEAD/skills/web-design-guidelines/SKILL.md",
+    "repo_clone_dir": "external_skills",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  },
+  "local/composition-patterns": {
+    "id": "local/composition-patterns",
+    "name": "vercel-composition-patterns",
+    "description": "React composition patterns that scale. Use when refactoring components with boolean prop proliferation, building flexible component libraries, or designing reusable APIs. Triggers on tasks involving compound components, render props, context providers, or component architecture.",
+    "skill_path": "external_skills/vercel-labs__agent-skills__HEAD/skills/composition-patterns/SKILL.md",
+    "repo_clone_dir": "external_skills",
+    "manifest_type": "SKILL.md",
+    "enabled": true
+  }
+}

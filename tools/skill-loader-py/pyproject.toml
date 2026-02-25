@@ -1,0 +1,11 @@
+[project]
+name = "skill-loader-py"
+version = "0.0.0"
+description = "Minimal skill loader (git/zip) for skills.sh GitHub repositories"
+requires-python = ">=3.10"
+dependencies = [
+  "PyYAML>=6.0.1"
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,39 @@
+name: Validate READMEs
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  check-readmes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check README files exist
+        run: |
+          if [ ! -f README.md ]; then echo "README.md missing"; exit 1; fi
+          if [ ! -f README_zh.md ]; then echo "README_zh.md missing"; exit 1; fi
+
+      - name: Validate key headings present
+        run: |
+          # English quickstart
+          grep -i "Quickstart" README.md || (echo "README.md missing 'Quickstart' heading" && exit 1)
+          # Chinese 快速开始
+          grep -n "快速开始" README_zh.md || (echo "README_zh.md missing '快速开始' heading" && exit 1)
+
+      - name: Run markdown linter (markdownlint)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install markdownlint-cli
+        run: |
+          npm install -g markdownlint-cli@0.33.0
+
+      - name: Lint README files
+        run: |
+          markdownlint README.md README_zh.md --config .markdownlint.json || true

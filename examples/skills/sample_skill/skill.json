@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0",
+  "id": "examples.sample_skill",
+  "name": "Sample Skill",
+  "description": "A minimal sample manifest used by loader tests.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "tags": ["example", "test"],
+  "repository": {
+    "type": "github",
+    "owner": "skills-sh",
+    "repo": "sample-skill",
+    "cloneUrl": "https://github.com/skills-sh/sample-skill.git"
+  },
+  "integrity": {
+    "pinnedCommit": "0000000000000000000000000000000000000000",
+    "sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "entry": {
+    "node": "index.js",
+    "python": "skill.py",
+    "exports": {
+      "register": "register"
+    }
+  },
+  "runtime": {
+    "node": {"minVersion": ">=18"},
+    "python": {"minVersion": ">=3.10"}
+  },
+  "permissions": {
+    "network": false,
+    "filesystem": true,
+    "subprocess": false
+  }
+}

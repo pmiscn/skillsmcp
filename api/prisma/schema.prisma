@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db?connection_limit=1&busy_timeout=30000"
+}
+
+model User {
+  id            String   @id @default(cuid())
+  username      String   @unique
+  password      String
+  role          String   @default("user")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  search_engine String?  @default("auto")
+}
+
+model Skill {
+  id               String   @id @default(cuid())
+  name             String
+  name_zh          String?
+  description      String
+  description_zh   String?
+  tags             String?
+  owner            String?
+  contact          String?
+  source           String?
+  skill_path       String?
+  weight           Float?
+  installs         Int      @default(0)
+  stars            Int      @default(0)
+  security_score   Int      @default(0)
+  security_data    String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  avoid            String?
+  best_practices   String?
+  content_i18n     String?
+  faq              String?
+  install_guide    String?
+  module_overrides String?
+  prompt_templates String?
+  quality_data     String?
+  quality_score    Int?
+  risk_data        String?
+  test_it          String?
+  use_cases        String?
+
+  @@index([security_score(sort: Desc)], map: "idx_skill_security_score")
+  @@index([weight(sort: Desc), installs(sort: Desc), updatedAt(sort: Desc)], map: "idx_skill_ranking")
+}
+
+model TranslationJob {
+  id           String    @id @default(cuid())
+  skill_id     String
+  target_lang  String
+  source_lang  String?   @default("en")
+  payload_type String
+  payload      String?
+  status       String    @default("queued")
+  attempts     Int       @default(0)
+  last_error   String?
+  locked_at    DateTime?
+  locked_by    String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([skill_id])
+  @@index([status, locked_at, createdAt])
+}
+
+model SystemConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model AuditReport {
+  id        String   @id @default(cuid())
+  skill_id  String
+  provider  String
+  model     String
+  score     Int
+  report    String
+  status    String   @default("completed")
+  createdAt DateTime @default(now())
+
+  @@index([skill_id])
+}
+
+model ApiKey {
+  id        String    @id @default(cuid())
+  name      String
+  key       String    @unique
+  role      String    @default("user")
+  lastUsed  DateTime?
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+}
