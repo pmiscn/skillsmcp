@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  skillshub:
+    build: .
+    container_name: skillshub
+    environment:
+      - SKILLSHUB_API_KEY=local-dev-key-123
+    volumes:
+      - ./tools/skillshub/corpus.json:/tmp/skillshub_corpus.json:ro
+      - ./data/index:/data/index
+    command: ['/bin/bash', '-c', './start_skillshub.sh']
