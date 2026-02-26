@@ -9,5 +9,12 @@ else
     exit 1
 fi
 
-# 启动服务
+# Ensure SKILLSHUB_API_KEY is set for protected endpoints (default local dev key)
+export SKILLSHUB_API_KEY=${SKILLSHUB_API_KEY:-local-dev-key-123}
+
+# Build index from DB in background so service starts with latest index (non-blocking)
+echo "Starting background index build from DB..."
+python tools/skillshub/build_index.py db &
+
+# Start the FastAPI service
 uvicorn tools.skillshub.service:app --host 0.0.0.0 --port 8001
