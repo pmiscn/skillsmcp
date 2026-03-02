@@ -80,7 +80,10 @@ api/prisma/dev.db-shm
 api/prisma/dev.db-wal
 api/prisma/dev.db-journal
 
-api/prisma/dev.db-*
+JP|api/prisma/dev.db-*
+NW|
+TH|# All database files
+api/*db*
 # Scripts
 api/check_*.ts
 api/check_*.js

@@ -1,14 +1,48 @@
-import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import util from 'node:util';
 import express from 'express';
 import cors from 'cors';
+import dotenv from 'dotenv';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config({ path: path.join(__dirname, '.env') });
+// Robust .env loader: when running from source or from dist, __dirname may point
+// to api/ or api/dist. Try several candidate locations and load the first .env we
+// find. This ensures process.env.JWT_SECRET is available for tests that run from
+// the compiled dist directory.
+function loadDotenv() {
+  const candidates = [
+    path.join(__dirname, '.env'), // local to file (works in src)
+    path.join(__dirname, '..', '.env'), // when running from api/dist
+    path.join(process.cwd(), 'api', '.env'), // project-root aware
+    path.join(process.cwd(), '.env'), // project root .env
+  ];
+
+  for (const p of candidates) {
+    try {
+      if (fs.existsSync(p)) {
+        dotenv.config({ path: p });
+        console.log('[Env] Loaded .env from', p);
+        return;
+      }
+    } catch (e) {
+      // ignore and continue
+    }
+  }
+
+  // Fallback: load default behavior
+  try {
+    dotenv.config();
+    console.log('[Env] No explicit .env found in candidates; used default dotenv resolution');
+  } catch (e) {
+    console.log('[Env] dotenv not available; skipping default load');
+  }
+}
+
+loadDotenv();
 process.on('uncaughtException', (err) => {
   console.error('--- UNCAUGHT EXCEPTION ---');
   try {
@@ -44,7 +78,7 @@ process.on('unhandledRejection', (reason, promise) => {
   // Do not exit automatically here; allow graceful shutdown if desired.
 });
 
-dotenv.config({ path: path.join(__dirname, '.env') });
+// noop — already loaded above
 
 const shouldSkipPrisma =
   process.env.PRISMA_CLIENT_ENGINE_TYPE === 'client' && !process.env.PRISMA_ACCELERATE_URL;

@@ -11,6 +11,7 @@ fi
 
 # Ensure SKILLSHUB_API_KEY is set for protected endpoints (default local dev key)
 export SKILLSHUB_API_KEY=${SKILLSHUB_API_KEY:-local-dev-key-123}
+export SKILLSHUB_USE_GPU=1
 
 # Build index from DB in background so service starts with latest index (non-blocking)
 echo "Starting background index build from DB..."

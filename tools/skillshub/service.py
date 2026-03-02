@@ -1,6 +1,7 @@
 import json
 import os
-from fastapi import FastAPI, HTTPException, Query, Header  # type: ignore[import-not-found]
+from fastapi import FastAPI, HTTPException, Query, Header, BackgroundTasks  # type: ignore[import-not-found]
+
 from pydantic import BaseModel  # type: ignore[import-not-found]
 try:
     from sentence_transformers import SentenceTransformer  # type: ignore[import-not-found]
@@ -566,51 +567,97 @@ def _require_api_key(x_api_key: Optional[str]):
 
 
 @app.post('/index/rebuild')
-def index_rebuild(corpus_path: str = '/tmp/skillshub_corpus.json', x_api_key: Optional[str] = Header(None)):
+def index_rebuild(background_tasks: BackgroundTasks, corpus_path: str = '/tmp/skillshub_corpus.json', x_api_key: Optional[str] = Header(None)):
     # Protected endpoint to (re)build the index from corpus
     _require_api_key(x_api_key)
-    # import local build_index implementation
-    # Import build_index module by path to avoid package import issues in different environments
-    import importlib.util
-    build_path = os.path.join(os.path.dirname(__file__), 'build_index.py')
-    if not os.path.exists(build_path):
-        raise HTTPException(status_code=500, detail='build_index.py not found')
-    spec = importlib.util.spec_from_file_location('skillshub_build', build_path)
-    if spec is None:
-        raise HTTPException(status_code=500, detail='Failed to create module spec for build_index')
-    build_mod = importlib.util.module_from_spec(spec)
-    try:
-        loader = spec.loader
-        if loader is None:
-            raise HTTPException(status_code=500, detail='No loader for build_index spec')
-        loader.exec_module(build_mod)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f'Cannot load build_index: {e}')
+    
+    def do_rebuild():
+        # import local build_index implementation
+        import importlib.util
+        build_path = os.path.join(os.path.dirname(__file__), 'build_index.py')
+        if not os.path.exists(build_path):
+            print(f'[Index] build_index.py not found at {build_path}')
+            return
+            
+        spec = importlib.util.spec_from_file_location('skillshub_build', build_path)
+        if spec is None:
+            print('[Index] Failed to create module spec for build_index')
+            return
+            
+        build_mod = importlib.util.module_from_spec(spec)
+        try:
+            loader = spec.loader
+            if loader is None:
+                print('[Index] No loader for build_index spec')
+                return
+            loader.exec_module(build_mod)
+        except Exception as e:
+            print(f'[Index] Cannot load build_index: {e}')
+            return
 
-    try:
-        build_mod.build_index(corpus_path)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f'Index build failed: {e}')
+        try:
+            print(f'[Index] Starting background rebuild from {corpus_path}...')
+            build_mod.build_index(corpus_path)
+            print('[Index] Background rebuild complete.')
+            
+            # reload index and metadata
+            global sbert_index, tfidf_index, metas, index_meta, tfidf_vectorizer, tfidf_field_embeddings, sbert_field_embeddings
+            sbert_index, tfidf_index, metas, index_meta = load_index()
+            tfidf_vectorizer = None
+            tfidf_field_embeddings = None
+            sbert_field_embeddings = None
+            _maybe_enable_faiss_gpu()
+            _maybe_enable_faiss_gpu()
+        except Exception as e:
+            print(f'[Index] Background rebuild failed: {e}')
 
-    # reload index and metadata
-    global sbert_index, tfidf_index, metas, index_meta, tfidf_vectorizer, tfidf_field_embeddings, sbert_field_embeddings
-    sbert_index, tfidf_index, metas, index_meta = load_index()
-    tfidf_vectorizer = None
-    tfidf_field_embeddings = None
-    sbert_field_embeddings = None
-    # attempt GPU migration if configured after update
-    _maybe_enable_faiss_gpu()
-    # attempt GPU migration if configured after initial load
-    _maybe_enable_faiss_gpu()
+    background_tasks.add_task(do_rebuild)
+    return {'status': 'accepted', 'message': 'Index rebuild started in background'}
 
-    # load index metadata if present
-    try:
-        with open('skills_index_meta.json', 'r', encoding='utf-8') as f:
-            meta = json.load(f)
-    except Exception:
-        meta = {'status': 'ok'}
 
-    return {'status': 'rebuilt', 'meta': meta}
+@app.post('/index/update')
+def index_update(background_tasks: BackgroundTasks, x_api_key: Optional[str] = Header(None)):
+    _require_api_key(x_api_key)
+    
+    def do_update():
+        import importlib.util
+        build_path = os.path.join(os.path.dirname(__file__), 'build_index.py')
+        if not os.path.exists(build_path):
+            print(f'[Index] build_index.py not found at {build_path}')
+            return
+            
+        spec = importlib.util.spec_from_file_location('skillshub_build', build_path)
+        if spec is None:
+            print('[Index] Failed to create module spec for build_index')
+            return
+            
+        build_mod = importlib.util.module_from_spec(spec)
+        try:
+            loader = spec.loader
+            if loader is None:
+                print('[Index] No loader for build_index spec')
+                return
+            loader.exec_module(build_mod)
+        except Exception as e:
+            print(f'[Index] Cannot load build_index: {e}')
+            return
+
+        try:
+            print('[Index] Starting background update...')
+            build_mod.update_index(model=model)
+            print('[Index] Background update complete.')
+            
+            global sbert_index, tfidf_index, metas, index_meta, tfidf_vectorizer, tfidf_field_embeddings, sbert_field_embeddings
+            sbert_index, tfidf_index, metas, index_meta = load_index()
+            tfidf_vectorizer = None
+            tfidf_field_embeddings = None
+            sbert_field_embeddings = None
+            _maybe_enable_faiss_gpu()
+        except Exception as e:
+            print(f'[Index] Background update failed: {e}')
+
+    background_tasks.add_task(do_update)
+    return {'status': 'accepted', 'message': 'Index update started in background'}
 
 
 @app.post('/index/update')

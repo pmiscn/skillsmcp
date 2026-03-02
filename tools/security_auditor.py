@@ -265,6 +265,13 @@ def audit_skill(skill_id: str, config: Optional[Dict] = None):
 
     name, description, skill_path = row
     
+    if not skill_path:
+        print(f"Skill {skill_id} has no skill_path. Marking as failed.", flush=True)
+        save_audit_report(skill_id, "system", "path_resolver", 0, "Skill path is empty/None in database.", "failed")
+        return
+    
+    full_path = PROJECT_ROOT / skill_path
+    
     full_path = PROJECT_ROOT / skill_path
     if not full_path.exists():
         full_path = PROJECT_ROOT / "api" / skill_path

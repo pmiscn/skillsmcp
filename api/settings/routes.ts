@@ -54,6 +54,81 @@ router.get('/security', adminOnly, async (_req, res) => {
   }
 });
 
+// Translation concurrency endpoints (DB-backed)
+router.get('/concurrency/translation', adminOnly, async (_req, res) => {
+  try {
+    const row = await (prisma as any).systemConfig.findUnique({
+      where: { key: 'translation_concurrency' },
+    });
+const value = row && row.value ? JSON.parse(row.value) : null;
+    const defaultValue = Number(process.env.TRANSLATION_CONCURRENCY) || 10;
+    res.json({
+      concurrency: value !== null && Number.isFinite(value) ? value : defaultValue,
+    });
+  } catch (err: any) {
+    console.error('[Settings] Failed to fetch translation concurrency:', err?.message || err);
+    res
+      .status(500)
+      .json({ code: '500.DB_ERROR', message: 'Failed to fetch translation concurrency' });
+  }
+});
+
+router.put('/concurrency/translation', adminOnly, async (req, res) => {
+  try {
+    const { concurrency } = req.body;
+    const n = Number(concurrency);
+    if (!Number.isFinite(n) || n <= 0)
+      return res.status(400).json({ code: '400.INVALID_VALUE', message: 'Invalid concurrency' });
+    await (prisma as any).systemConfig.upsert({
+      where: { key: 'translation_concurrency' },
+      update: { value: JSON.stringify(n) },
+      create: { key: 'translation_concurrency', value: JSON.stringify(n) },
+    });
+    res.json({ success: true, concurrency: n });
+  } catch (err: any) {
+    console.error('[Settings] Failed to save translation concurrency:', err?.message || err);
+    res
+      .status(500)
+      .json({ code: '500.DB_ERROR', message: 'Failed to save translation concurrency' });
+  }
+});
+
+router.get('/concurrency/security', adminOnly, async (_req, res) => {
+  try {
+    const row = await (prisma as any).systemConfig.findUnique({
+      where: { key: 'security_audit_concurrency' },
+    });
+    const value = row && row.value ? JSON.parse(row.value) : null;
+    const defaultValue = Number(process.env.SECURITY_AUDIT_CONCURRENCY) || 2;
+    res.json({ concurrency: value !== null && Number.isFinite(value) ? value : defaultValue });
+  } catch (err: any) {
+    console.error('[Settings] Failed to fetch security audit concurrency:', err?.message || err);
+    res
+      .status(500)
+      .json({ code: '500.DB_ERROR', message: 'Failed to fetch security audit concurrency' });
+  }
+});
+
+router.put('/concurrency/security', adminOnly, async (req, res) => {
+  try {
+    const { concurrency } = req.body;
+    const n = Number(concurrency);
+    if (!Number.isFinite(n) || n <= 0)
+      return res.status(400).json({ code: '400.INVALID_VALUE', message: 'Invalid concurrency' });
+    await (prisma as any).systemConfig.upsert({
+      where: { key: 'security_audit_concurrency' },
+      update: { value: JSON.stringify(n) },
+      create: { key: 'security_audit_concurrency', value: JSON.stringify(n) },
+    });
+    res.json({ success: true, concurrency: n });
+  } catch (err: any) {
+    console.error('[Settings] Failed to save security audit concurrency:', err?.message || err);
+    res
+      .status(500)
+      .json({ code: '500.DB_ERROR', message: 'Failed to save security audit concurrency' });
+  }
+});
+
 router.put('/security', adminOnly, async (req, res) => {
   try {
     const config = req.body;

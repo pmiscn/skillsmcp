@@ -5,6 +5,7 @@ services:
     container_name: skillshub
     environment:
       - SKILLSHUB_API_KEY=local-dev-key-123
+      - SKILLSHUB_USE_GPU=1
     volumes:
       - ./tools/skillshub/corpus.json:/tmp/skillshub_corpus.json:ro
       - ./data/index:/data/index

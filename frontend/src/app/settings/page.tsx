@@ -80,7 +80,13 @@ export default function SettingsPage() {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [savingSecurity, setSavingSecurity] = useState(false);
+const [savingSecurity, setSavingSecurity] = useState(false);
+  const [translationConcurrency, setTranslationConcurrency] = useState<number | null>(null);
+  const [loadingTranslationConcurrency, setLoadingTranslationConcurrency] = useState(true);
+  const [savingTranslationConcurrency, setSavingTranslationConcurrency] = useState(false);
+  const [securityConcurrency, setSecurityConcurrency] = useState<number | null>(null);
+  const [loadingSecurityConcurrency, setLoadingSecurityConcurrency] = useState(true);
+  const [savingSecurityConcurrency, setSavingSecurityConcurrency] = useState(false);
   const [savingSearch, setSavingSearch] = useState(false);
   const [testResults, setTestResults] = useState<
     Record<number, { success: boolean; result?: string; error?: string; loading: boolean }>
@@ -96,11 +102,15 @@ export default function SettingsPage() {
   const [newKeyName, setNewKeyName] = useState('');
   const [creatingKey, setCreatingKey] = useState(false);
   const [generatedKey, setGeneratedKey] = useState<string | null>(null);
-
-  useEffect(() => {
-    Promise.all([loadConfig(), loadSecurityConfig(), loadApiKeys(), loadSearchEngineConfig()]).finally(() =>
-      setLoading(false),
-    );
+useEffect(() => {
+    Promise.all([
+      loadConfig(),
+      loadSecurityConfig(),
+      loadApiKeys(),
+      loadSearchEngineConfig(),
+      loadTranslationConcurrency(),
+      loadSecurityConcurrency(),
+    ]).finally(() => setLoading(false));
   }, []);
 
   const loadConfig = async () => {
@@ -128,8 +138,69 @@ export default function SettingsPage() {
       setUseGpu(!!data.use_gpu);
     } catch (error) {
       console.error('Failed to load search engine config:', error);
+    };
+  };
+
+  const loadTranslationConcurrency = async () => {
+    setLoadingTranslationConcurrency(true);
+    try {
+      const data = await api.getTranslationConcurrency();
+      setTranslationConcurrency(typeof data.concurrency === 'number' ? data.concurrency : null);
+    } catch (error) {
+      console.error('Failed to load translation concurrency', error);
+      setTranslationConcurrency(null);
+    } finally {
+      setLoadingTranslationConcurrency(false);
     }
   };
+
+  const handleSaveTranslationConcurrency = async () => {
+    if (translationConcurrency === null || translationConcurrency < 0) {
+      showToast(t('settings.invalid_value'), 'error');
+      return;
+    }
+    setSavingTranslationConcurrency(true);
+    try {
+      await api.updateTranslationConcurrency(translationConcurrency);
+      showToast(t('settings.save_success'), 'success');
+    } catch (error) {
+      console.error('Failed to save translation concurrency', error);
+      showToast(t('settings.save_failed'), 'error');
+    } finally {
+      setSavingTranslationConcurrency(false);
+    }
+  };
+
+  const loadSecurityConcurrency = async () => {
+    setLoadingSecurityConcurrency(true);
+    try {
+      const data = await api.getSecurityConcurrency();
+      setSecurityConcurrency(typeof data.concurrency === 'number' ? data.concurrency : null);
+    } catch (error) {
+      console.error('Failed to load security concurrency', error);
+      setSecurityConcurrency(null);
+    } finally {
+      setLoadingSecurityConcurrency(false);
+    }
+  };
+
+  const handleSaveSecurityConcurrency = async () => {
+    if (securityConcurrency === null || securityConcurrency < 0) {
+      showToast(t('settings.invalid_value'), 'error');
+      return;
+    }
+    setSavingSecurityConcurrency(true);
+    try {
+      await api.updateSecurityConcurrency(securityConcurrency);
+      showToast(t('settings.save_success'), 'success');
+    } catch (error) {
+      console.error('Failed to save security concurrency', error);
+      showToast(t('settings.save_failed'), 'error');
+    } finally {
+      setSavingSecurityConcurrency(false);
+    }
+  };
+
 
   const loadApiKeys = async () => {
     try {
@@ -450,6 +521,40 @@ export default function SettingsPage() {
                   <div>
                     <h2 className="text-2xl font-bold text-foreground mb-2">{t('settings.security.title')}</h2>
                     <p className="text-muted-foreground text-[15px] mb-8">{t('settings.security.desc')}</p>
+</div>
+
+                  {/* Security concurrency control (runtime) */}
+                  <div className="p-4 bg-card border border-border rounded-xl">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm font-semibold text-foreground">
+                          {t('settings.security.concurrency')}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {t('settings.security.concurrency_desc')}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {loadingSecurityConcurrency ? (
+                          <div className="text-muted-foreground">Loading...</div>
+                        ) : (
+                          <input
+                            type="number"
+                            min={0}
+                            value={securityConcurrency ?? ''}
+                            onChange={(e) => setSecurityConcurrency(Number(e.target.value))}
+                            className="w-32 h-10 px-3 rounded-xl border border-input bg-background text-foreground focus:outline-none"
+                          />
+                        )}
+                        <button
+                          onClick={handleSaveSecurityConcurrency}
+                          disabled={savingSecurityConcurrency || loadingSecurityConcurrency}
+                          className="h-10 px-4 bg-primary text-primary-foreground rounded-xl font-bold disabled:opacity-50"
+                        >
+                          {savingSecurityConcurrency ? <Loader2 className="w-4 h-4 animate-spin" /> : t('settings.save')}
+                        </button>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="space-y-8">
@@ -482,9 +587,11 @@ export default function SettingsPage() {
                           <p className="text-sm text-muted-foreground leading-relaxed">
                             已为您预设大多数供应商 URL，只有使用本地或私有服务器时才需手动输入。
                           </p>
-                        </div>
+</div>
                       </div>
                     </div>
+
+
 
                     {/* Model Parameters */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
@@ -654,9 +761,44 @@ export default function SettingsPage() {
                   className="space-y-8"
                 >
                   <div>
-                    <h2 className="text-2xl font-bold text-foreground mb-2">{t('settings.translation.title')}</h2>
+<h2 className="text-2xl font-bold text-foreground mb-2">{t('settings.translation.title')}</h2>
                     <p className="text-muted-foreground text-[15px] mb-8">{t('settings.translation.desc')}</p>
                   </div>
+
+                  {/* Translation concurrency control (runtime) */}
+                  <div className="p-6 bg-card border border-border rounded-xl mb-6">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <div className="text-sm font-semibold text-foreground">
+                          {t('settings.translation.concurrency')}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {t('settings.translation.concurrency_desc')}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {loadingTranslationConcurrency ? (
+                          <div className="text-muted-foreground">Loading...</div>
+                        ) : (
+                          <input
+                            type="number"
+                            min={0}
+                            value={translationConcurrency ?? ''}
+                            onChange={(e) => setTranslationConcurrency(Number(e.target.value))}
+                            className="w-32 h-10 px-3 rounded-xl border border-input bg-background text-foreground focus:outline-none"
+                          />
+                        )}
+                        <button
+                          onClick={handleSaveTranslationConcurrency}
+                          disabled={savingTranslationConcurrency || loadingTranslationConcurrency}
+className="h-10 px-4 bg-primary text-primary-foreground rounded-xl font-bold disabled:opacity-50"
+                        >
+                          {savingTranslationConcurrency ? <Loader2 className="w-4 h-4 animate-spin" /> : t('settings.save')}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
                   
                   <div className="space-y-6">
                     {config.engines.map((engine, index) => (
@@ -836,9 +978,6 @@ export default function SettingsPage() {
                         { id: 'tfidf', label: '文字匹配 (找关键词)', desc: '最原始但也最快的方式。如果你知道插件或工具的确切名字，用这个准没错。' },
                         { id: 'sbert', label: '语义搜索 (懂你意思)', desc: '最聪明的搜索。它能听懂你说话的意思，哪怕你搜的是中文也能找到英文写的工具。' },
                         { id: 'hybrid', label: '全能搜索 (综合匹配)', desc: '全都要。把文字匹配和意思匹配结合起来，虽然稍微慢一点，但能搜得最全。' },
-                        { id: 'tfidf', label: '关键词模式 (TF-IDF)', desc: '基于精确词频匹配，速度最快，适合查找特定名称' },
-                        { id: 'sbert', label: '语义模式 (SBERT)', desc: '理解搜索意图，支持跨语言和近义词匹配' },
-                        { id: 'hybrid', label: '混合模式 (Hybrid)', desc: '结合关键词与语义，提供最平衡的检索效果' },
                       ].map((mode) => (
                         <button
                           key={mode.id}

@@ -274,7 +274,8 @@ export default function IndexStatusPage() {
   const handleContinueUpdate = async () => {
     setContinueUpdating(true);
     try {
-      await api.updateSkillIndex();
+      const { jobId } = await api.updateSkillIndex();
+      if (jobId) startLogStream(jobId);
       showToast(t('index.success_rebuild'), 'success');
       setTimeout(fetchStatus, 2000);
     } catch (err) {
@@ -444,7 +445,8 @@ export default function IndexStatusPage() {
     setRebuilding(true);
 
     try {
-      await api.rebuildSkillIndex();
+      const { jobId } = await api.rebuildSkillIndex();
+      if (jobId) startLogStream(jobId);
       showToast(t('index.success_rebuild'), 'success');
       setTimeout(fetchStatus, 2000);
     } catch (err) {

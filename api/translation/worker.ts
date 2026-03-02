@@ -30,7 +30,7 @@ type TranslationPayload = {
 };
 
 const WORKER_ID = process.env.TRANSLATION_WORKER_ID || `worker-${os.hostname()}`;
-const CONCURRENCY = Number(process.env.TRANSLATION_CONCURRENCY || 10);
+let CONCURRENCY = Number(process.env.TRANSLATION_CONCURRENCY || 10);
 const LOCK_TIMEOUT_MINUTES = Number(process.env.TRANSLATION_LOCK_TIMEOUT_MINUTES || 15);
 const MAX_ATTEMPTS = Number(process.env.TRANSLATION_MAX_ATTEMPTS || 3);
 const SKILLSHUB_BASE_URL = process.env.SKILLSHUB_BASE_URL || 'http://127.0.0.1:8001';
@@ -149,6 +149,35 @@ const loadConfig = async (): Promise<TranslationConfig> => {
     return { engines: [{ type: 'internal' }] };
   }
 };
+
+// Load concurrency setting from DB (systemConfig key: 'translation_concurrency')
+const refreshConcurrencyFromDb = async () => {
+  try {
+    const row: any = await prisma.systemConfig.findUnique({
+      where: { key: 'translation_concurrency' },
+    });
+    if (row && row.value) {
+      const parsed = JSON.parse(row.value);
+      const n = Number(parsed);
+      if (Number.isFinite(n) && n > 0) {
+        if (n !== CONCURRENCY) {
+          console.log(`[TranslationWorker] Updating concurrency from DB: ${CONCURRENCY} -> ${n}`);
+          CONCURRENCY = n;
+        }
+      }
+    }
+  } catch (err: any) {
+    // keep existing concurrency on error
+    // do not crash worker for config lookup failure
+    console.warn('[TranslationWorker] Failed to refresh concurrency from DB:', err?.message || err);
+  }
+};
+
+// Refresh once at startup and periodically every 60s
+refreshConcurrencyFromDb().catch(() => {});
+setInterval(() => {
+  refreshConcurrencyFromDb().catch(() => {});
+}, 60000);
 
 const watchConfig = () => {
   try {
@@ -596,14 +625,38 @@ const translateData = async (data: Record<string, any>, sourceLang: string, targ
 };
 
 const updateSkillField = async (skillId: string, field: string, lang: string, value: any) => {
+  // Defensive: ensure field is provided
+  if (!field || typeof field !== 'string') {
+    throw new Error(`updateSkillField: invalid field provided: ${String(field)}`);
+  }
+
   const skill = await prisma.skill.findUnique({ where: { id: skillId } });
-  if (!skill) return;
-  const current = parseJson((skill as any)[field]) || {};
+  if (!skill) throw new Error(`Skill not found: ${skillId}`);
+
+  // Ensure the Skill model actually contains the requested field
+  if (!(field in skill)) {
+    // Helpful logging for debugging mapping issues
+    console.error(
+      `[TranslationWorker] updateSkillField: field '${field}' does not exist on Skill model for skill ${skillId}. Available keys: ${Object.keys(
+        skill,
+      ).join(', ')}`,
+    );
+    throw new Error(`Skill field not found: ${field}`);
+  }
+
+  const raw = (skill as any)[field];
+  const current = parseJson(raw) || {};
   current[lang] = value;
-  await prisma.skill.update({
-    where: { id: skillId },
-    data: { [field]: JSON.stringify(current) } as any,
-  });
+
+  console.log(
+    `[TranslationWorker] updateSkillField: updating skill ${skillId} field '${field}' for lang '${lang}'`,
+  );
+
+  // Use a safe update payload (compute object first)
+  const updateData: Record<string, any> = {};
+  updateData[field] = JSON.stringify(current);
+
+  await prisma.skill.update({ where: { id: skillId }, data: updateData });
 };
 
 const handleJob = async (job: any) => {
@@ -629,7 +682,15 @@ const handleJob = async (job: any) => {
   } else {
     const data = payload.data || {};
     const translated = await translateData(data, sourceLang, targetLang);
-    await updateSkillField(job.skill_id, payload.type, targetLang, translated);
+    // Use resolver to map payload.type -> whitelist field name
+    try {
+      const { resolveFieldForPayload } = await import('./skillUtils.js');
+      const field = resolveFieldForPayload(payload.type, targetLang);
+      await updateSkillField(job.skill_id, field, targetLang, translated);
+    } catch (err: any) {
+      // Re-throw so outer catch handles attempts/status transition
+      throw new Error(`Failed to resolve/update skill field: ${err?.message || err}`);
+    }
   }
 
   await prisma.translationJob.update({
@@ -666,7 +727,7 @@ const performRebuild = async () => {
   lastRebuildTime = Date.now();
   try {
     console.log('[TranslationWorker] Triggering index rebuild...');
-    const response = await fetch(`${SKILLSHUB_BASE_URL}/index/rebuild`, {
+    const response = await fetch(`${SKILLSHUB_BASE_URL}/index/rebuild?corpus_path=db`, {
       method: 'POST',
       headers: { 'X-API-KEY': apiKey },
     });
@@ -736,16 +797,26 @@ const run = async () => {
             `[TranslationWorker] Error processing job ${job.id} (Attempt ${job.attempts + 1}):`,
             inspectObject(error, 2),
           );
+
+          const newAttempts = job.attempts + 1;
+          const finalStatus = newAttempts >= MAX_ATTEMPTS ? 'failed' : 'retry';
+
           await prisma.translationJob.update({
             where: { id: job.id },
             data: {
-              status: 'retry',
-              attempts: job.attempts + 1,
+              status: finalStatus,
+              attempts: newAttempts,
               last_error: e.message || 'Translation failed',
               locked_at: null,
               locked_by: null,
             },
           });
+
+          if (finalStatus === 'failed') {
+            console.error(
+              `[TranslationWorker] Job ${job.id} failed after ${newAttempts} attempts. Marking as failed.`,
+            );
+          }
         })
         .finally(() => {
           activeJobs--;

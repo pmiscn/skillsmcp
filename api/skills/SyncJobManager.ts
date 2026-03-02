@@ -84,10 +84,17 @@ class SyncJobManager extends EventEmitter {
     if (!job.skillsRegistered) job.skillsRegistered = 0;
     this.addLog(id, 'system', `Executing: ${command} ${args.join(' ')}`);
 
+    const timeout = 10 * 60 * 1000; // 10 minutes timeout
     return new Promise<{ stdout: string; stderr: string }>((resolve, reject) => {
       let stdoutBuffer = '';
       let stderrBuffer = '';
       const proc = spawn(command, args, { cwd });
+
+      const timer = setTimeout(() => {
+        proc.kill();
+        this.addLog(id, 'system', `Command timed out after ${timeout / 1000}s`);
+        reject(new Error(`Command timed out after ${timeout / 1000}s`));
+      }, timeout);
 
       proc.stdout.on('data', (data) => {
         const lines = data.toString().split('\n');
@@ -95,7 +102,6 @@ class SyncJobManager extends EventEmitter {
         lines.forEach((line: string) => {
           if (line.trim()) {
             this.addLog(id, 'stdout', line);
-            // Count registered skills from register_skills.py output
             if (line.includes('registered:') && line.includes('->')) {
               job.skillsRegistered = (job.skillsRegistered || 0) + 1;
             }
@@ -112,6 +118,7 @@ class SyncJobManager extends EventEmitter {
       });
 
       proc.on('close', (code) => {
+        clearTimeout(timer);
         job.exitCode = code;
         if (code === 0) {
           this.addLog(id, 'system', `Command completed successfully (exit code 0)`);
@@ -129,7 +136,7 @@ class SyncJobManager extends EventEmitter {
       });
 
       proc.on('error', (err) => {
-        // Normalize errors from child process events
+        clearTimeout(timer);
         (async () => {
           const { normalizeError } = await import('../utils/errors.js');
           const e = normalizeError(err);

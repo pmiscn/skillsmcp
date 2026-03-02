@@ -151,7 +151,7 @@ def upsert_skill_to_db(entry: Dict, verbose: bool = True, trigger_audit: bool = 
         entry["id"],
         entry["name"],
         entry["name_zh"],
-        entry["description"] or "",
+        " ".join(entry["description"]) if isinstance(entry["description"], list) else (entry["description"] or ""),
         entry["description_zh"],
         tags_str,
         entry["owner"],
@@ -175,19 +175,17 @@ def upsert_skill_to_db(entry: Dict, verbose: bool = True, trigger_audit: bool = 
         json.dumps(entry.get("test_it", {})) if entry.get("test_it") else None,
         json.dumps(entry.get("content_i18n", {})) if entry.get("content_i18n") else None,
         json.dumps(entry.get("module_overrides", {})) if entry.get("module_overrides") else None,
-        now,
-        now
+    now,
+    now
     ))
-    
+
     conn.commit()
     conn.close()
     if verbose: print(f"Upserted {entry['id']} to database")
-
     # Keep sync/import path lightweight by default.
     # Security audits should be handled by the background auditor daemon.
     if trigger_audit:
         run_security_audit(entry["id"], verbose=verbose)
-
 
 def enqueue_translation_jobs(entry: Dict, verbose: bool = True):
     if not DB_PATH.exists():
@@ -442,7 +440,7 @@ def _extract_module_sections(text: str) -> Dict[str, Union[List[Dict[str, str]],
     return result
 
 
-def build_entry(manifest_path: Path) -> Dict:
+def build_entry(manifest_path: Path, verbose: bool = True) -> Dict:
     try:
         rel = manifest_path.relative_to(PROJECT_ROOT)
     except Exception:
@@ -560,7 +558,11 @@ def build_entry(manifest_path: Path) -> Dict:
     # --- Start of Metadata Inference ---
     auto_tags = set(_normalize_string_list(entry.get("tags")))
     path_str = str(rel).lower()
-    desc_str = (entry["description"] or "").lower()
+    desc = entry.get("description") or ""
+    if isinstance(desc, list):
+        desc_str = " ".join([str(d) for d in desc]).lower()
+    else:
+        desc_str = str(desc).lower()
     
     tag_map = {
         "coding": ["coding", "dev", "development", "programming", "script", "api", "web", "frontend", "backend", "react", "typescript", "javascript", "python", "rust", "golang", "c++", "java", "github", "git", "cli"],
@@ -608,6 +610,12 @@ def build_entry(manifest_path: Path) -> Dict:
     entry["requires_internet"] = requires_internet
 
     ai_risk = 20
+    content = ""
+    try:
+        if manifest_path.suffix == '.md' or manifest_path.name == 'SKILL.md':
+            content = manifest_path.read_text(encoding="utf-8", errors="replace").lower()
+    except:
+        pass
     content = ""
     try:
         if manifest_path.suffix == '.md':
@@ -696,7 +704,7 @@ def register_skills_from_roots(
         if verbose: print(f"Found {len(skills_found)} skills in {root}")
         
         for md in skills_found:
-            entry = build_entry(md)
+            entry = build_entry(md, verbose=verbose)
             if not entry:
                 continue
             

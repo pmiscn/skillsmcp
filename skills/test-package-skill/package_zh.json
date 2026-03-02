@@ -1,1 +1,1 @@
-{"name": "test-package-skill", "skill": {"name": "测试包技能", "description": "测试package.json支持", "categories": ["coding"], "permissions": []}}
+{"name": "test-package-skill", "skill": {"name": "测试包技能", "description": "测试 package.json 支持", "categories": ["编码"], "permissions": []}}

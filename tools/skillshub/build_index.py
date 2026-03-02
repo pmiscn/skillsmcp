@@ -146,6 +146,7 @@ def build_index(
     meta_path='skills_meta.json',
     tfidf_index_path='skills_tfidf.idx',
 ):
+    print(f"[DEBUG] build_index called with corpus_path={corpus_path}")
     if corpus_path and corpus_path != 'db' and os.path.exists(corpus_path):
         corpus_raw = load_corpus(corpus_path)
         if isinstance(corpus_raw, dict):
@@ -154,6 +155,7 @@ def build_index(
             corpus = corpus_raw
     else:
         corpus = load_from_db()
+        print(f"[DEBUG] Loaded {len(corpus)} items from db")
         
     if not corpus:
         print("No skills found to index.")
@@ -325,6 +327,7 @@ def update_index(
     indexed_ids = {m['id'] for m in existing_metas}
     
     all_skills = load_from_db()
+    print(f'[DEBUG-UPDATE] all_skills len: {len(all_skills)}, existing_metas len: {len(existing_metas)}')
     new_skills = [s for s in all_skills if s['id'] not in indexed_ids]
     
     if not new_skills:

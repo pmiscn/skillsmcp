@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8002';
 
 async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
   const token = localStorage.getItem('accessToken');
@@ -18,7 +18,8 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('accessToken');
       if (!window.location.pathname.startsWith('/auth/login')) {
-        window.location.href = '/auth/login?redirect=' + encodeURIComponent(window.location.pathname);
+        window.location.href =
+          '/auth/login?redirect=' + encodeURIComponent(window.location.pathname);
       }
     }
   }
@@ -677,6 +678,34 @@ export const api = {
       method: 'POST',
     });
     if (!response.ok) throw new Error('Failed to detect translations');
+    return response.json();
+  },
+  getTranslationConcurrency: async () => {
+    const response = await fetchWithAuth('/api/settings/concurrency/translation');
+    if (!response.ok) throw new Error('Failed to fetch translation concurrency');
+    return response.json();
+  },
+  updateTranslationConcurrency: async (concurrency: number) => {
+    const response = await fetchWithAuth('/api/settings/concurrency/translation', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ concurrency }),
+    });
+    if (!response.ok) throw new Error('Failed to update translation concurrency');
+    return response.json();
+  },
+  getSecurityConcurrency: async () => {
+    const response = await fetchWithAuth('/api/settings/concurrency/security');
+    if (!response.ok) throw new Error('Failed to fetch security concurrency');
+    return response.json();
+  },
+  updateSecurityConcurrency: async (concurrency: number) => {
+    const response = await fetchWithAuth('/api/settings/concurrency/security', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ concurrency }),
+    });
+    if (!response.ok) throw new Error('Failed to update security concurrency');
     return response.json();
   },
 };

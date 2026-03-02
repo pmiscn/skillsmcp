@@ -848,7 +848,7 @@ router.post('/sync/all-skills-sh', requireAdmin, async (_req: AuthRequest, res) 
           'system',
           'Finalizing: Queueing vector index rebuild (async)...',
         );
-        void fetch(`${SKILLSHUB_BASE_URL}/index/rebuild`, {
+        void fetch(`${SKILLSHUB_BASE_URL}/index/rebuild?corpus_path=db`, {
           method: 'POST',
           headers: { 'X-API-KEY': apiKey },
         })
@@ -1032,7 +1032,7 @@ router.post('/sync', requireAdmin, async (req: AuthRequest, res) => {
           const apiKey = process.env.SKILLSHUB_API_KEY;
           if (apiKey) {
             syncJobManager.addLog(jobId, 'system', `Triggering index rebuild...`);
-            const rebuildUrl = `${SKILLSHUB_BASE_URL}/index/rebuild`;
+            const rebuildUrl = `${SKILLSHUB_BASE_URL}/index/rebuild?corpus_path=db`;
             void fetchJSON(rebuildUrl, {
               method: 'POST',
               headers: { 'X-API-KEY': apiKey },
@@ -1280,7 +1280,7 @@ router.post(
       if (rebuildIndex) {
         const apiKey = process.env.SKILLSHUB_API_KEY;
         if (apiKey) {
-          fetch(`${SKILLSHUB_BASE_URL}/index/rebuild`, {
+          fetch(`${SKILLSHUB_BASE_URL}/index/rebuild?corpus_path=db`, {
             method: 'POST',
             headers: { 'X-API-KEY': apiKey },
           }).catch((err) => console.error('Manual import index rebuild failed:', err));
@@ -1316,7 +1316,7 @@ router.post('/index/rebuild', requireAdmin, async (_req, res) => {
       return res.status(500).json({ code: '500.INTERNAL_ERROR', message: 'API key missing' });
     }
 
-    const rebuildUrl = `${SKILLSHUB_BASE_URL}/index/rebuild`;
+    const rebuildUrl = `${SKILLSHUB_BASE_URL}/index/rebuild?corpus_path=db`;
     console.log(`[Index] Triggering rebuild at: ${rebuildUrl}`);
 
     const { data, status } = await fetchJSON(rebuildUrl, {
@@ -1520,11 +1520,17 @@ router.post('/translate/detect', requireAdmin, async (req: AuthRequest, res) => 
               skill_id: skill.id,
               payload_type: module,
               target_lang: targetLang,
-              status: { in: ['queued', 'processing'] },
             },
           });
 
-          if (existingJob) continue;
+          if (existingJob) {
+            // Skip if job exists and is currently queued/processing/completed
+            // Allow re-queue only if it's in a terminal failed/cancelled state.
+            if (!['failed', 'cancelled'].includes(existingJob.status)) {
+              continue;
+            }
+            // If failed/cancelled, we'll upsert below which will reset attempts and set status to queued.
+          }
 
           let payload: any = { type: module, targetLang };
           if (module === 'content') {
