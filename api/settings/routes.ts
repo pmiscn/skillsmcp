@@ -1,15 +1,14 @@
 import { Router } from 'express';
 import fs from 'node:fs/promises';
-import { createWriteStream, openSync } from 'node:fs';
 import path from 'node:path';
-import { spawn, exec } from 'node:child_process';
+import { spawn, execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { ProxyAgent } from 'undici';
 import { authenticateToken, AuthRequest } from '../middleware/auth.js';
 import prisma from '../db.js';
 import { fileURLToPath } from 'url';
 
-const execAsync = promisify(exec);
+const execAsync = promisify(execFile);
 const router = Router();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -60,7 +59,7 @@ router.get('/concurrency/translation', adminOnly, async (_req, res) => {
     const row = await (prisma as any).systemConfig.findUnique({
       where: { key: 'translation_concurrency' },
     });
-const value = row && row.value ? JSON.parse(row.value) : null;
+    const value = row && row.value ? JSON.parse(row.value) : null;
     const defaultValue = Number(process.env.TRANSLATION_CONCURRENCY) || 10;
     res.json({
       concurrency: value !== null && Number.isFinite(value) ? value : defaultValue,
@@ -199,6 +198,34 @@ router.put('/search-engine', adminOnly, async (req, res) => {
     res.status(500).json({ code: '500.DB_ERROR', message: 'Failed to save search engine config' });
   }
 });
+
+router.get('/oauth', adminOnly, async (_req, res) => {
+  try {
+    const config = await (prisma as any).systemConfig.findUnique({
+      where: { key: 'oauth_config' },
+    });
+    res.json(config ? JSON.parse(config.value) : { providers: [] });
+  } catch (error) {
+    res.status(500).json({ code: '500.DB_ERROR', message: 'Failed to fetch OAuth config' });
+  }
+});
+
+router.put('/oauth', adminOnly, async (req, res) => {
+  try {
+    const config = req.body;
+    if (!config || typeof config !== 'object') {
+      return res.status(400).json({ code: '400.INVALID_CONFIG', message: 'Invalid OAuth config' });
+    }
+    await (prisma as any).systemConfig.upsert({
+      where: { key: 'oauth_config' },
+      update: { value: JSON.stringify(config) },
+      create: { key: 'oauth_config', value: JSON.stringify(config) },
+    });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ code: '500.DB_ERROR', message: 'Failed to save OAuth config' });
+  }
+});
 router.post('/security/audit/:skillId', adminOnly, async (req, res) => {
   try {
     const { skillId } = req.params;
@@ -234,7 +261,7 @@ router.post('/security/audit/:skillId', adminOnly, async (req, res) => {
   }
 });
 
-router.post('/security/audit-all', adminOnly, async (req, res) => {
+router.post('/security/audit-all', adminOnly, async (_req, res) => {
   try {
     const pythonProcess = spawn('python3', [SCRIPT_PATH, '--all'], {
       detached: true,
@@ -370,7 +397,6 @@ router.post('/dashboard/processes/start', adminOnly, async (req, res) => {
     const { name } = req.body;
     let command = '';
     let args: string[] = [];
-    let cwd = PROJECT_ROOT;
 
     if (name === 'Translation Worker') {
       command = 'npm';
@@ -378,11 +404,9 @@ router.post('/dashboard/processes/start', adminOnly, async (req, res) => {
     } else if (name === 'Security Auditor') {
       command = 'python3';
       args = ['tools/security_auditor.py', '--all'];
-      cwd = path.resolve(PROJECT_ROOT, '..');
     } else if (name === 'Index Service') {
       command = 'uvicorn';
       args = ['tools.skillshub.service:app', '--port', '8001'];
-      cwd = path.resolve(PROJECT_ROOT, '..');
     } else {
       return res.status(400).json({ code: '400.INVALID_PROCESS', message: 'Invalid process name' });
     }

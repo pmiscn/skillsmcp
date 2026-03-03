@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
 import { useAuth } from '@/context/AuthContext';
@@ -16,6 +16,11 @@ export function Navbar({ children }: NavbarProps) {
   const { language, setLanguage, t } = useLanguage();
   const { logout } = useAuth();
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
@@ -55,72 +60,75 @@ export function Navbar({ children }: NavbarProps) {
 
         <div className="flex flex-1 items-center justify-end gap-3">
           {children}
-
           <div className="mx-2 hidden h-6 w-px bg-border/60 sm:block" />
 
-          <div className="flex items-center gap-1 rounded-full border border-border/40 bg-muted/20 p-1 backdrop-blur-sm">
-            <button
-              onClick={() => setTheme('light')}
-              className={cn(
-                'rounded-full p-1.5 transition-all',
-                theme === 'light'
-                  ? 'bg-background text-foreground shadow-sm ring-1 ring-border/10'
-                  : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground',
-              )}
-              title="Light Mode"
-            >
-              <Sun size={14} />
-            </button>
-            <button
-              onClick={() => setTheme('system')}
-              className={cn(
-                'rounded-full p-1.5 transition-all',
-                theme === 'system'
-                  ? 'bg-background text-foreground shadow-sm ring-1 ring-border/10'
-                  : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground',
-              )}
-              title="System Mode"
-            >
-              <Laptop size={14} />
-            </button>
-            <button
-              onClick={() => setTheme('dark')}
-              className={cn(
-                'rounded-full p-1.5 transition-all',
-                theme === 'dark'
-                  ? 'bg-background text-foreground shadow-sm ring-1 ring-border/10'
-                  : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground',
-              )}
-              title="Dark Mode"
-            >
-              <Moon size={14} />
-            </button>
-          </div>
+          {mounted && (
+            <>
+              <div className="flex items-center gap-1 rounded-full border border-border/40 bg-muted/20 p-1 backdrop-blur-sm">
+                <button
+                  onClick={() => setTheme('light')}
+                  className={cn(
+                    'rounded-full p-1.5 transition-all',
+                    theme === 'light'
+                      ? 'bg-background text-foreground shadow-sm ring-1 ring-border/10'
+                      : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground',
+                  )}
+                  title="Light Mode"
+                >
+                  <Sun size={14} />
+                </button>
+                <button
+                  onClick={() => setTheme('system')}
+                  className={cn(
+                    'rounded-full p-1.5 transition-all',
+                    theme === 'system'
+                      ? 'bg-background text-foreground shadow-sm ring-1 ring-border/10'
+                      : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground',
+                  )}
+                  title="System Mode"
+                >
+                  <Laptop size={14} />
+                </button>
+                <button
+                  onClick={() => setTheme('dark')}
+                  className={cn(
+                    'rounded-full p-1.5 transition-all',
+                    theme === 'dark'
+                      ? 'bg-background text-foreground shadow-sm ring-1 ring-border/10'
+                      : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground',
+                  )}
+                  title="Dark Mode"
+                >
+                  <Moon size={14} />
+                </button>
+              </div>
 
-          <div className="flex items-center gap-1 rounded-full border border-border/40 bg-muted/20 p-1 backdrop-blur-sm">
-            <button
-              onClick={() => setLanguage('en')}
-              className={cn(
-                'rounded-full px-2.5 py-1 text-xs font-medium transition-all',
-                language === 'en'
-                  ? 'bg-background text-foreground shadow-sm ring-1 ring-border/10'
-                  : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground',
-              )}
-            >
-              EN
-            </button>
-            <button
-              onClick={() => setLanguage('zh')}
-              className={cn(
-                'rounded-full px-2.5 py-1 text-xs font-medium transition-all',
-                language === 'zh'
-                  ? 'bg-background text-foreground shadow-sm ring-1 ring-border/10'
-                  : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground',
-              )}
-            >
-              CN
-            </button>
-          </div>
+              <div className="flex items-center gap-1 rounded-full border border-border/40 bg-muted/20 p-1 backdrop-blur-sm">
+                <button
+                  onClick={() => setLanguage('en')}
+                  className={cn(
+                    'rounded-full px-2.5 py-1 text-xs font-medium transition-all',
+                    language === 'en'
+                      ? 'bg-background text-foreground shadow-sm ring-1 ring-border/10'
+                      : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground',
+                  )}
+                >
+                  EN
+                </button>
+                <button
+                  onClick={() => setLanguage('zh')}
+                  className={cn(
+                    'rounded-full px-2.5 py-1 text-xs font-medium transition-all',
+                    language === 'zh'
+                      ? 'bg-background text-foreground shadow-sm ring-1 ring-border/10'
+                      : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground',
+                  )}
+                >
+                  CN
+                </button>
+              </div>
+            </>
+          )}
 
           <div className="hidden sm:flex items-center gap-2">
             <button
@@ -136,3 +144,5 @@ export function Navbar({ children }: NavbarProps) {
     </nav>
   );
 }
+
+export default Navbar;

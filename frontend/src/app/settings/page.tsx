@@ -38,6 +38,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useToast } from '@/context/ToastContext';
 import { api, ApiKey } from '@/lib/api';
 import { Navbar } from '@/components/layout/Navbar';
+import { SettingsSidebar } from '@/components/settings/SettingsSidebar';
 import { cn } from '@/lib/utils';
 
 interface Engine {
@@ -433,28 +434,6 @@ useEffect(() => {
     );
   }
 
-  const tabs = [
-    {
-      id: 'translation' as const,
-      label: t('settings.translation_tab'),
-      icon: <Languages size={20} className="text-[#4a90e2]" />,
-    },
-    {
-      id: 'security' as const,
-      label: t('settings.security_tab'),
-      icon: <ShieldCheck size={20} className="text-[#52c41a]" />,
-    },
-    {
-      id: 'search' as const,
-      label: '搜索与匹配',
-      icon: <Brain size={20} className="text-[#8b5cf6]" />,
-    },
-    {
-      id: 'authorization' as const,
-      label: t('settings.authorization_tab'),
-      icon: <Lock size={20} className="text-[#f5a623]" />,
-    },
-  ];
 
   const mcpEndpoint =
     typeof window !== 'undefined' ? `${window.location.origin}/api/mcp` : '/api/mcp';
@@ -478,34 +457,7 @@ useEffect(() => {
         <div className="bg-card rounded-2xl border border-border shadow-sm flex min-h-[800px] overflow-hidden">
           
           {/* Sidebar Navigation */}
-          <aside className="w-64 border-r border-border shrink-0 pt-6 bg-card/50">
-            <div className="px-6 mb-8">
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">{t('settings.title')}</h1>
-            </div>
-
-            <nav className="flex flex-col">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    'w-full flex items-center gap-3 px-6 py-4 text-[15px] font-medium transition-all group relative',
-                    activeTab === tab.id
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
-                  )}
-                >
-                  {/* Active Indicator Bar */}
-                  {activeTab === tab.id && (
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
-                  )}
-                  
-                  <span className="shrink-0">{tab.icon}</span>
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
-          </aside>
+          <SettingsSidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
           {/* Content Area */}
           <div className="flex-1 p-10 bg-card overflow-y-auto">

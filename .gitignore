@@ -163,3 +163,21 @@ readme_api_mcp.md
 .zencoder/
 api/translation/config.json
 
+
+# Local DB dumps and exports
+dump.sql
+*.sql
+dump_db.py
+
+# Playwright artifacts
+.playwright-cli/
+
+# PID files and runtime artifacts
+*.pid
+
+# Local skillshub backups (may contain tokens)
+tools/skillshub/*.json
+
+# Local env variants
+.env.local
+.env.*.local

@@ -12,9 +12,35 @@ model User {
   username      String   @unique
   password      String
   role          String   @default("user")
+  enabled       Boolean  @default(true)
+  provider      String?
+  providerId    String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   search_engine String?  @default("auto")
+
+  accounts Account[]
+
+  @@index([provider, providerId])
+}
+
+model Account {
+  id                String   @id @default(cuid())
+  userId            String
+  provider          String
+  providerAccountId String
+  accessToken       String?
+  refreshToken      String?
+  expiresAt         DateTime?
+  tokenType         String?
+  scope             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Skill {

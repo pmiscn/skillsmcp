@@ -14,6 +14,13 @@ interface LoginRequest extends Request {
   };
 }
 
+interface RegisterRequest extends Request {
+  body: {
+    username: string;
+    password: string;
+  };
+}
+
 export const login = async (req: LoginRequest, res: Response) => {
   const { username, password } = req.body;
 
@@ -22,6 +29,9 @@ export const login = async (req: LoginRequest, res: Response) => {
 
     if (!user || !bcrypt.compareSync(password, user.password)) {
       return res.status(401).json({ code: '401.UNAUTHORIZED', message: 'Invalid credentials' });
+    }
+    if (!user.enabled) {
+      return res.status(403).json({ code: '403.USER_DISABLED', message: 'User disabled' });
     }
 
     const payload: JwtPayload = {
@@ -39,6 +49,55 @@ export const login = async (req: LoginRequest, res: Response) => {
     res.json(tokens);
   } catch (error) {
     res.status(500).json({ error: 'Authentication failed' });
+  }
+};
+
+export const register = async (req: RegisterRequest, res: Response) => {
+  const { username, password } = req.body ?? {};
+
+  if (!username || !password) {
+    return res
+      .status(400)
+      .json({ code: '400.MISSING_FIELDS', message: 'Username and password required' });
+  }
+
+  if (typeof username !== 'string' || typeof password !== 'string') {
+    return res
+      .status(400)
+      .json({ code: '400.INVALID_FIELDS', message: 'Invalid username or password' });
+  }
+
+  const normalizedUsername = username.trim();
+  if (!normalizedUsername) {
+    return res.status(400).json({ code: '400.INVALID_USERNAME', message: 'Invalid username' });
+  }
+
+  if (password.length < 8) {
+    return res
+      .status(400)
+      .json({ code: '400.WEAK_PASSWORD', message: 'Password must be at least 8 characters' });
+  }
+
+  try {
+    const existing = await prisma.user.findUnique({ where: { username: normalizedUsername } });
+    if (existing) {
+      return res.status(409).json({ code: '409.USER_EXISTS', message: 'Username already exists' });
+    }
+
+    const hashed = bcrypt.hashSync(password, 10);
+    const user = await prisma.user.create({
+      data: {
+        username: normalizedUsername,
+        password: hashed,
+        role: 'user',
+        enabled: true,
+      },
+      select: { id: true, username: true, role: true, enabled: true, createdAt: true },
+    });
+
+    res.status(201).json({ user });
+  } catch (error) {
+    res.status(500).json({ code: '500.DATABASE_ERROR', message: 'Failed to register user' });
   }
 };
 
@@ -89,5 +148,51 @@ export const me = async (req: MeRequest, res: Response) => {
     res.json(user);
   } catch (error) {
     res.status(500).json({ code: '500.DATABASE_ERROR' });
+  }
+};
+
+const toRecord = (value: unknown): Record<string, unknown> | null => {
+  if (!value || typeof value !== 'object') return null;
+  return value as Record<string, unknown>;
+};
+
+const getString = (value: unknown): string => (typeof value === 'string' ? value : '');
+
+const getBool = (value: unknown): boolean => value === true;
+
+const extractProvider = (value: unknown) => {
+  const record = toRecord(value);
+  return {
+    enabled: getBool(record?.enabled),
+    clientId: getString(record?.clientId),
+  };
+};
+
+export const oauthProviders = async (_req: Request, res: Response) => {
+  try {
+    const row = await (prisma as any).systemConfig.findUnique({
+      where: { key: 'oauth_config' },
+    });
+
+    const raw = row?.value ? JSON.parse(row.value) : {};
+    const rawRecord = toRecord(raw) || {};
+    const rawProviders = toRecord(rawRecord.providers) || {};
+    const rawLdap = toRecord(rawRecord.ldap) || {};
+
+    const response = {
+      ldap: {
+        enabled: getBool(rawLdap.enabled),
+      },
+      providers: {
+        google: extractProvider(rawProviders.google),
+        microsoft: extractProvider(rawProviders.microsoft),
+        github: extractProvider(rawProviders.github),
+        wechat: extractProvider(rawProviders.wechat),
+      },
+    };
+
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({ code: '500.DB_ERROR', message: 'Failed to fetch OAuth providers' });
   }
 };

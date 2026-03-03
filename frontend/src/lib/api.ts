@@ -66,6 +66,23 @@ export interface SettingsResponse {
   };
 }
 
+export interface OAuthProviderPublic {
+  enabled: boolean;
+  clientId: string;
+}
+
+export interface OAuthProvidersPublicResponse {
+  ldap: {
+    enabled: boolean;
+  };
+  providers: {
+    google: OAuthProviderPublic;
+    microsoft: OAuthProviderPublic;
+    github: OAuthProviderPublic;
+    wechat: OAuthProviderPublic;
+  };
+}
+
 export interface SkillFile {
   name: string;
   path: string;
@@ -461,6 +478,12 @@ export const api = {
     return response.json();
   },
 
+  getOAuthProvidersPublic: async (): Promise<OAuthProvidersPublicResponse> => {
+    const response = await fetch(`${API_BASE_URL}/api/auth/oauth/providers`);
+    if (!response.ok) throw new Error('Failed to fetch OAuth providers');
+    return response.json();
+  },
+
   getCurrentUser: async (): Promise<UserInfo> => {
     const response = await fetchWithAuth('/api/auth/me');
 
@@ -533,7 +556,7 @@ export const api = {
     if (!response.ok) throw new Error('Failed to fetch translation config');
     return response.json();
   },
-  updateTranslationConfig: async (config: Record<string, unknown>) => {
+  updateTranslationConfig: async (config: any) => {
     const response = await fetchWithAuth('/api/settings/translation', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -547,7 +570,7 @@ export const api = {
     if (!response.ok) throw new Error('Failed to fetch security config');
     return response.json();
   },
-  updateSecurityConfig: async (config: Record<string, unknown>) => {
+  updateSecurityConfig: async (config: any) => {
     const response = await fetchWithAuth('/api/settings/security', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -626,7 +649,7 @@ export const api = {
     if (!response.ok) throw new Error('Failed to test translation engine');
     return response.json();
   },
-  testSecurityConfig: async (config: Record<string, unknown>) => {
+  testSecurityConfig: async (config: any) => {
     const response = await fetchWithAuth('/api/settings/security/test', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -706,6 +729,55 @@ export const api = {
       body: JSON.stringify({ concurrency }),
     });
     if (!response.ok) throw new Error('Failed to update security concurrency');
+    return response.json();
+  },
+  getUsers: async () => {
+    const response = await fetchWithAuth('/api/users');
+    if (!response.ok) throw new Error('Failed to fetch users');
+    return response.json();
+  },
+
+  createUser: async (user: Record<string, unknown>) => {
+    const response = await fetchWithAuth('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(user),
+    });
+    if (!response.ok) throw new Error('Failed to create user');
+    return response.json();
+  },
+
+  updateUser: async (id: string, user: Record<string, unknown>) => {
+    const response = await fetchWithAuth(`/api/users/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(user),
+    });
+    if (!response.ok) throw new Error('Failed to update user');
+    return response.json();
+  },
+
+  deleteUser: async (id: string) => {
+    const response = await fetchWithAuth(`/api/users/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) throw new Error('Failed to delete user');
+    return response.json();
+  },
+
+  getOAuthConfig: async () => {
+    const response = await fetchWithAuth('/api/settings/oauth');
+    if (!response.ok) throw new Error('Failed to fetch OAuth config');
+    return response.json();
+  },
+
+  updateOAuthConfig: async (config: any) => {
+    const response = await fetchWithAuth('/api/settings/oauth', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config),
+    });
+    if (!response.ok) throw new Error('Failed to update OAuth config');
     return response.json();
   },
 };

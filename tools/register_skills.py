@@ -151,7 +151,7 @@ def upsert_skill_to_db(entry: Dict, verbose: bool = True, trigger_audit: bool = 
         entry["id"],
         entry["name"],
         entry["name_zh"],
-        " ".join(entry["description"]) if isinstance(entry["description"], list) else (entry["description"] or ""),
+        #QB|        _normalize_description(entry.get("description")),
         entry["description_zh"],
         tags_str,
         entry["owner"],
@@ -348,6 +348,49 @@ def _normalize_string_list(value) -> List[str]:
     # 去重并保持原顺序
     return list(dict.fromkeys(normalized))
 
+
+def _normalize_description(value) -> str:
+    """Normalize description field - handle string, list, or dict."""
+    if value is None:
+        return ""
+    
+    # Already a string
+    if isinstance(value, str):
+        return value.strip()
+    
+    # List of strings or dicts
+    if isinstance(value, list):
+        parts = []
+        for item in value:
+            if isinstance(item, str):
+                parts.append(item)
+            elif isinstance(item, dict):
+                # Try to extract text from dict
+                text = (
+                    item.get("content")
+                    or item.get("text")
+                    or item.get("description")
+                    or item.get("value")
+                    or ""
+                )
+                if text:
+                    parts.append(text)
+            elif item is not None:
+                parts.append(str(item))
+        return " ".join(parts).strip()
+    
+    # Dict
+    if isinstance(value, dict):
+        return (
+            value.get("content")
+            or value.get("text")
+            or value.get("description")
+            or value.get("value")
+            or str(value)
+        ).strip() if value else ""
+    
+    # Fallback
+    return str(value).strip() if value else ""
 
 def _normalize_heading(text: str) -> str:
     return re.sub(r"[^a-z0-9 ]+", "", text.lower()).strip()
