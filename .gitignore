@@ -181,3 +181,7 @@ tools/skillshub/*.json
 # Local env variants
 .env.local
 .env.*.local
+
+# Ignore generated skill meta files
+test_meta.json
+test_metas.json
