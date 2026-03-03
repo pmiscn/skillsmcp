@@ -2,20 +2,34 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { motion } from 'framer-motion';
 import { Zap, AlertCircle, Loader2 } from 'lucide-react';
+import { api, type OAuthProvidersPublicResponse } from '@/lib/api';
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const { t } = useLanguage();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [oauthConfig, setOauthConfig] = useState<OAuthProvidersPublicResponse | null>(null);
+  const [loadingOauth, setLoadingOauth] = useState(true);
 
   useEffect(() => {
     setMounted(true);
+    api
+      .getOAuthProvidersPublic()
+      .then(setOauthConfig)
+      .catch(console.error)
+      .finally(() => setLoadingOauth(false));
   }, []);
+
+  const handleOAuthLogin = (provider: string) => {
+    window.location.href = `/api/auth/${provider}`;
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -106,6 +120,67 @@ export default function LoginPage() {
               {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Sign In'}
             </button>
           </form>
+
+          {!loadingOauth &&
+            oauthConfig &&
+            (oauthConfig.providers.google.enabled ||
+              oauthConfig.providers.microsoft.enabled ||
+              oauthConfig.providers.github.enabled ||
+              oauthConfig.providers.wechat.enabled) && (
+              <div className="mt-6">
+                <div className="relative mb-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-border" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                  </div>
+                </div>
+
+                <div className="grid gap-3">
+                  {oauthConfig.providers.google.enabled && (
+                    <button
+                      type="button"
+                      onClick={() => handleOAuthLogin('google')}
+                      className="inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-11 w-full transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                    >
+                      <img src="/oauth/google.svg" className="w-5 h-5 mr-2" alt="Google" />
+                      {t('login.google')}
+                    </button>
+                  )}
+                  {oauthConfig.providers.microsoft.enabled && (
+                    <button
+                      type="button"
+                      onClick={() => handleOAuthLogin('microsoft')}
+                      className="inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-11 w-full transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                    >
+                      <img src="/oauth/microsoft.svg" className="w-5 h-5 mr-2" alt="Microsoft" />
+                      {t('login.microsoft')}
+                    </button>
+                  )}
+                  {oauthConfig.providers.github.enabled && (
+                    <button
+                      type="button"
+                      onClick={() => handleOAuthLogin('github')}
+                      className="inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-11 w-full transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                    >
+                      <img src="/oauth/github.svg" className="w-5 h-5 mr-2" alt="GitHub" />
+                      {t('login.github')}
+                    </button>
+                  )}
+                  {oauthConfig.providers.wechat.enabled && (
+                    <button
+                      type="button"
+                      onClick={() => handleOAuthLogin('wechat')}
+                      className="inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-11 w-full transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                    >
+                      <img src="/oauth/wechat.svg" className="w-5 h-5 mr-2" alt="WeChat" />
+                      {t('login.wechat')}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
         </div>
 
         <div className="mt-6 text-center">
