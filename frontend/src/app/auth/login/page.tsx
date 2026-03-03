@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
 import { motion } from 'framer-motion';
 import { Zap, AlertCircle, Loader2 } from 'lucide-react';
@@ -180,6 +181,16 @@ export default function LoginPage() {
                   )}
                 </div>
               </div>
+            )}
+
+          <div className="mt-6 text-center">
+            <Link href="/auth/register" className="text-sm text-primary hover:underline">
+              {t('login.register_link')}
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-6 text-center">
             )}
         </div>
 

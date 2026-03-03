@@ -477,6 +477,20 @@ export const api = {
 
     return response.json();
   },
+  register: async (credentials: { username: string; password: string }): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(credentials),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Registration failed');
+    }
+
+    return response.json();
+  },
 
   getOAuthProvidersPublic: async (): Promise<OAuthProvidersPublicResponse> => {
     const response = await fetch(`${API_BASE_URL}/api/auth/oauth/providers`);

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import prisma from '../db.js';
 import { authenticateToken, AuthRequest } from '../middleware/auth.js';
 import bcrypt from 'bcryptjs';
+const prismaAny = prisma as any;
 
 const router = Router();
 
@@ -49,7 +50,7 @@ router.put('/preferences', async (req: AuthRequest, res) => {
 
 router.get('/', adminOnly, async (_req: AuthRequest, res) => {
   try {
-    const users = await prisma.user.findMany({
+    const users = await prismaAny.user.findMany({
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
@@ -62,14 +63,14 @@ router.get('/', adminOnly, async (_req: AuthRequest, res) => {
         updatedAt: true,
       },
     });
-    res.json(users);
+    res.json(users.map((user: any) => ({ ...user, status: user.status ?? null })));
   } catch (error) {
     res.status(500).json({ code: '500.DATABASE_ERROR', message: 'Failed to fetch users' });
   }
 });
 
 router.post('/', adminOnly, async (req: AuthRequest, res) => {
-  const { username, password, role, enabled } = req.body ?? {};
+  const { username, password, role, enabled, status } = req.body ?? {};
   if (!username || !password) {
     return res
       .status(400)
@@ -94,20 +95,27 @@ router.post('/', adminOnly, async (req: AuthRequest, res) => {
   }
 
   const normalizedRole = typeof role === 'string' && role.trim() ? role.trim() : 'user';
+  const allowedStatuses = ['PENDING', 'ACTIVE', 'DISABLED'] as const;
+  const normalizedStatus =
+    typeof status === 'string' && status.trim() ? status.trim().toUpperCase() : 'ACTIVE';
+  if (!allowedStatuses.includes(normalizedStatus as any)) {
+    return res.status(400).json({ code: '400.INVALID_STATUS', message: 'Invalid status' });
+  }
 
   try {
-    const existing = await prisma.user.findUnique({ where: { username: normalizedUsername } });
+    const existing = await prismaAny.user.findUnique({ where: { username: normalizedUsername } });
     if (existing) {
       return res.status(409).json({ code: '409.USER_EXISTS', message: 'Username already exists' });
     }
 
     const hashed = bcrypt.hashSync(password, 10);
-    const user = await prisma.user.create({
+    const user = await prismaAny.user.create({
       data: {
         username: normalizedUsername,
         password: hashed,
         role: normalizedRole,
         enabled: enabled === undefined ? true : Boolean(enabled),
+        status: normalizedStatus,
       },
       select: {
         id: true,
@@ -119,7 +127,7 @@ router.post('/', adminOnly, async (req: AuthRequest, res) => {
       },
     });
 
-    res.status(201).json(user);
+    res.status(201).json({ ...user, status: normalizedStatus });
   } catch (error) {
     res.status(500).json({ code: '500.DATABASE_ERROR', message: 'Failed to create user' });
   }
@@ -127,7 +135,7 @@ router.post('/', adminOnly, async (req: AuthRequest, res) => {
 
 router.put('/:id', adminOnly, async (req: AuthRequest, res) => {
   const { id } = req.params;
-  const { password, role, enabled, username } = req.body ?? {};
+  const { password, role, enabled, username, status } = req.body ?? {};
 
   if (!id) return res.status(400).json({ code: '400.MISSING_ID', message: 'User ID required' });
 
@@ -149,6 +157,15 @@ router.put('/:id', adminOnly, async (req: AuthRequest, res) => {
     data.enabled = Boolean(enabled);
   }
 
+  if (typeof status === 'string') {
+    const normalizedStatus = status.trim().toUpperCase();
+    const allowedStatuses = ['PENDING', 'ACTIVE', 'DISABLED'] as const;
+    if (!allowedStatuses.includes(normalizedStatus as any)) {
+      return res.status(400).json({ code: '400.INVALID_STATUS', message: 'Invalid status' });
+    }
+    data.status = normalizedStatus;
+  }
+
   if (typeof password === 'string') {
     if (password.length < 8) {
       return res
@@ -163,7 +180,7 @@ router.put('/:id', adminOnly, async (req: AuthRequest, res) => {
   }
 
   try {
-    const updated = await prisma.user.update({
+    const updated = await prismaAny.user.update({
       where: { id: String(id) },
       data,
       select: {
@@ -175,7 +192,7 @@ router.put('/:id', adminOnly, async (req: AuthRequest, res) => {
         updatedAt: true,
       },
     });
-    res.json(updated);
+    res.json({ ...updated, status: data.status ?? null });
   } catch (error: any) {
     if (error?.code === 'P2002') {
       return res.status(409).json({ code: '409.USER_EXISTS', message: 'Username already exists' });
@@ -189,7 +206,7 @@ router.delete('/:id', adminOnly, async (req: AuthRequest, res) => {
   if (!id) return res.status(400).json({ code: '400.MISSING_ID', message: 'User ID required' });
 
   try {
-    await prisma.user.delete({ where: { id: String(id) } });
+    await prismaAny.user.delete({ where: { id: String(id) } });
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ code: '500.DATABASE_ERROR', message: 'Failed to delete user' });

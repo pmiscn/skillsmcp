@@ -12,6 +12,7 @@ model User {
   username      String   @unique
   password      String
   role          String   @default("user")
+  status        UserStatus @default(PENDING)
   enabled       Boolean  @default(true)
   provider      String?
   providerId    String?
@@ -22,6 +23,12 @@ model User {
   accounts Account[]
 
   @@index([provider, providerId])
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  DISABLED
 }
 
 model Account {

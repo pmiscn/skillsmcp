@@ -6,7 +6,7 @@ import { SettingsSidebar } from '@/components/settings/SettingsSidebar';
 import { useLanguage } from '@/context/LanguageContext';
 import { api } from '@/lib/api';
 import { useToast } from '@/context/ToastContext';
-import { ArrowLeft, Loader2, Plus, Trash2, Edit2, Search } from 'lucide-react';
+import { ArrowLeft, Loader2, Plus, Trash2, Edit2, Search, Check, X } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -16,6 +16,7 @@ interface AdminUser {
   username: string;
   role: 'admin' | 'user';
   enabled: boolean;
+  status?: 'PENDING' | 'ACTIVE' | 'DISABLED';
   createdAt?: string;
 }
 
@@ -131,6 +132,36 @@ export default function UsersPage() {
     }
   };
 
+  const handleApprove = async (user: AdminUser) => {
+    if (!confirm(t('users.approve_confirm'))) return;
+
+    try {
+      // Assuming backend handles status update via patch/put
+      // @ts-ignore - status field is added
+      await api.updateUser(user.id, { status: 'ACTIVE', enabled: true });
+      showToast(t('users.approve_success'), 'success');
+      loadUsers();
+    } catch (error) {
+      console.error(t('users.approve_failed'), error);
+      showToast(t('users.approve_failed'), 'error');
+    }
+  };
+
+  const handleReject = async (user: AdminUser) => {
+    if (!confirm(t('users.reject_confirm'))) return;
+
+    try {
+      // @ts-ignore - status field is added
+      await api.updateUser(user.id, { status: 'DISABLED', enabled: false });
+      showToast(t('users.reject_success'), 'success');
+      loadUsers();
+    } catch (error) {
+      console.error(t('users.reject_failed'), error);
+      showToast(t('users.reject_failed'), 'error');
+    }
+  };
+
+
   const filteredUsers = users.filter((user) =>
     user.username.toLowerCase().includes(searchQuery.toLowerCase()),
   );
@@ -229,6 +260,23 @@ export default function UsersPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4">
+                          {user.status === 'PENDING' ? (
+                            <span className="flex items-center gap-1.5 text-orange-600 text-xs font-bold">
+                              <span className="w-2 h-2 rounded-full bg-orange-500" />
+                              {t('users.status_pending')}
+                            </span>
+                          ) : (user.status === 'ACTIVE' || user.enabled) ? (
+                            <span className="flex items-center gap-1.5 text-green-600 text-xs font-bold">
+                              <span className="w-2 h-2 rounded-full bg-green-500" />
+                              {t('users.status_active')}
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1.5 text-muted-foreground text-xs font-bold">
+                              <span className="w-2 h-2 rounded-full bg-gray-400" />
+                              {t('users.status_disabled')}
+                            </span>
+                          )}
+                        </td>
                           {user.enabled ? (
                             <span className="flex items-center gap-1.5 text-green-600 text-xs font-bold">
                               <span className="w-2 h-2 rounded-full bg-green-500" />
@@ -242,6 +290,40 @@ export default function UsersPage() {
                           )}
                         </td>
                         <td className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {user.status === 'PENDING' && (
+                              <>
+                                <button
+                                  onClick={() => handleApprove(user)}
+                                  className="p-2 hover:bg-green-500/10 rounded-lg text-muted-foreground hover:text-green-600 transition-colors"
+                                  title={t('users.approve')}
+                                >
+                                  <Check size={16} />
+                                </button>
+                                <button
+                                  onClick={() => handleReject(user)}
+                                  className="p-2 hover:bg-red-500/10 rounded-lg text-muted-foreground hover:text-red-600 transition-colors"
+                                  title={t('users.reject')}
+                                >
+                                  <X size={16} />
+                                </button>
+                                <div className="w-px h-4 bg-border mx-1" />
+                              </>
+                            )}
+                            <button
+                              onClick={() => handleOpenModal(user)}
+                              className="p-2 hover:bg-accent rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(user.id)}
+                              className="p-2 hover:bg-red-500/10 rounded-lg text-muted-foreground hover:text-red-600 transition-colors"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => handleOpenModal(user)}
