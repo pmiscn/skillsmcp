@@ -189,12 +189,12 @@ export default function LoginPage() {
             </Link>
           </div>
 
+          <div className="mt-6 text-center">
+            <p className="text-xs text-muted-foreground">
+              Restricted access. Authorized personnel only.
+            </p>
+          </div>
 
-        <div className="mt-6 text-center">
-          <p className="text-xs text-muted-foreground">
-            Restricted access. Authorized personnel only.
-          </p>
-        </div>
       </motion.div>
     </div>
   );
