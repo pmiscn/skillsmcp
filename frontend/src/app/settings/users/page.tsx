@@ -313,21 +313,7 @@ export default function UsersPage() {
                             </button>
                           </div>
                         </td>
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => handleOpenModal(user)}
-                              className="p-2 hover:bg-accent rounded-lg text-muted-foreground hover:text-foreground transition-colors"
-                            >
-                              <Edit2 size={16} />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(user.id)}
-                              className="p-2 hover:bg-red-500/10 rounded-lg text-muted-foreground hover:text-red-600 transition-colors"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        </td>
+
                       </tr>
                     ))
                   )}
