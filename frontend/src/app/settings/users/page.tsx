@@ -262,10 +262,10 @@ export default function UsersPage() {
                         <td className="px-6 py-4">
                           {user.status === 'PENDING' ? (
                             <span className="flex items-center gap-1.5 text-orange-600 text-xs font-bold">
-                              <span className="w-2 h-2 rounded-full bg-orange-500" />
+                              <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
                               {t('users.status_pending')}
                             </span>
-                          ) : (user.status === 'ACTIVE' || user.enabled) ? (
+                          ) : user.status === 'ACTIVE' ? (
                             <span className="flex items-center gap-1.5 text-green-600 text-xs font-bold">
                               <span className="w-2 h-2 rounded-full bg-green-500" />
                               {t('users.status_active')}
@@ -277,18 +277,7 @@ export default function UsersPage() {
                             </span>
                           )}
                         </td>
-                          {user.enabled ? (
-                            <span className="flex items-center gap-1.5 text-green-600 text-xs font-bold">
-                              <span className="w-2 h-2 rounded-full bg-green-500" />
-                              {t('users.active')}
-                            </span>
-                          ) : (
-                            <span className="flex items-center gap-1.5 text-muted-foreground text-xs font-bold">
-                              <span className="w-2 h-2 rounded-full bg-gray-400" />
-                              {t('users.disabled')}
-                            </span>
-                          )}
-                        </td>
+
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">
                             {user.status === 'PENDING' && (
