@@ -151,7 +151,7 @@ def upsert_skill_to_db(entry: Dict, verbose: bool = True, trigger_audit: bool = 
         entry["id"],
         entry["name"],
         entry["name_zh"],
-        #QB|        _normalize_description(entry.get("description")),
+        _normalize_description(entry.get("description")),
         entry["description_zh"],
         tags_str,
         entry["owner"],
@@ -418,7 +418,9 @@ def _split_sections(text: str, level: int) -> List[Dict]:
     return sections
 
 
-def _extract_module_sections(text: str) -> Dict[str, Union[List[Dict[str, str]], Dict[str, str]]]:
+def _extract_module_sections(
+    text: str,
+) -> Dict[str, Union[List[Dict[str, Optional[str]]], Dict[str, Optional[str]]]]:
     modules = {
         "use_cases": ["use cases", "use case", "what you can build"],
         "prompt_templates": ["prompt templates", "try these prompts", "prompts"],
@@ -437,7 +439,7 @@ def _extract_module_sections(text: str) -> Dict[str, Union[List[Dict[str, str]],
                     return key
         return None
 
-    result: Dict[str, Union[List[Dict[str, str]], Dict[str, str]]] = {}
+    result: Dict[str, Union[List[Dict[str, Optional[str]]], Dict[str, Optional[str]]]] = {}
     top_sections = _split_sections(text, 2)
     for section in top_sections:
         module = match_module(section["title"])
@@ -445,7 +447,7 @@ def _extract_module_sections(text: str) -> Dict[str, Union[List[Dict[str, str]],
             continue
         body = "\n".join(section["lines"]).strip()
         sub_sections = _split_sections(body, 3)
-        entries: List[Dict[str, str]] = []
+        entries: List[Dict[str, Optional[str]]] = []
         if sub_sections:
             for sub in sub_sections:
                 sub_body = "\n".join(sub["lines"]).strip()
@@ -455,11 +457,15 @@ def _extract_module_sections(text: str) -> Dict[str, Union[List[Dict[str, str]],
 
         if module == "faq":
             result[module] = [
-                {"q": entry["title"], "a": entry["body"]} for entry in entries if entry["body"]
+                {"q": entry["title"] or "", "a": entry["body"] or ""}
+                for entry in entries
+                if entry["body"]
             ]
         elif module == "prompt_templates":
             result[module] = [
-                {"title": entry["title"], "prompt": entry["body"]} for entry in entries if entry["body"]
+                {"title": entry["title"] or "", "prompt": entry["body"] or ""}
+                for entry in entries
+                if entry["body"]
             ]
         elif module == "use_cases":
             result[module] = [
@@ -469,7 +475,11 @@ def _extract_module_sections(text: str) -> Dict[str, Union[List[Dict[str, str]],
             ]
         elif module == "install_guide":
             if sub_sections:
-                result[module] = {entry["title"].lower(): entry["body"] for entry in entries if entry["body"]}
+                result[module] = {
+                    (entry["title"] or "").lower(): entry["body"]
+                    for entry in entries
+                    if entry["body"]
+                }
             else:
                 result[module] = {"default": body}
         elif module == "test_it":
@@ -483,7 +493,7 @@ def _extract_module_sections(text: str) -> Dict[str, Union[List[Dict[str, str]],
     return result
 
 
-def build_entry(manifest_path: Path, verbose: bool = True) -> Dict:
+def build_entry(manifest_path: Path, verbose: bool = True) -> Optional[Dict]:
     try:
         rel = manifest_path.relative_to(PROJECT_ROOT)
     except Exception:
