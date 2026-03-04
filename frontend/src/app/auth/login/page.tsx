@@ -188,11 +188,7 @@ export default function LoginPage() {
               {t('login.register_link')}
             </Link>
           </div>
-        </div>
 
-        <div className="mt-6 text-center">
-            )}
-        </div>
 
         <div className="mt-6 text-center">
           <p className="text-xs text-muted-foreground">
