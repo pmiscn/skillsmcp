@@ -194,7 +194,7 @@ export default function LoginPage() {
               Restricted access. Authorized personnel only.
             </p>
           </div>
-
+        </div>
       </motion.div>
     </div>
   );
